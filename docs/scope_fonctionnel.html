@@ -1,0 +1,54 @@
+
+<style>
+  .section { margin-bottom: 20px; }
+  .section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-tertiary); margin-bottom: 10px; }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+  .feat { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .feat-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+  .feat-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.45; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 1px 7px; border-radius: 20px; margin-bottom: 6px; }
+  .v1 { background: #E1F5EE; color: #085041; }
+  .v2 { background: #FAEEDA; color: #633806; }
+  .v3 { background: #EEEDFE; color: #3C3489; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 18px 0; }
+</style>
+
+<div style="padding: 4px 0 8px">
+
+<div class="section">
+  <div class="section-title">V1 — MVP solide (1-2 mois)</div>
+  <div class="feature-grid">
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Intake guidé</div><div class="feat-desc">Formulaire conversationnel : type de projet, stack, contraintes, deadline</div></div>
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Génération de spec</div><div class="feat-desc">User stories, critères d'acceptance, hors-scope — via Claude</div></div>
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Éditeur inline</div><div class="feat-desc">Modifier / régénérer section par section après génération</div></div>
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Export Markdown / PDF</div><div class="feat-desc">Téléchargement direct, mise en page propre</div></div>
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Auth + projets</div><div class="feat-desc">Compte utilisateur, liste de specs sauvegardées</div></div>
+    <div class="feat"><span class="badge v1">V1</span><div class="feat-name">Lien de partage</div><div class="feat-desc">URL read-only pour envoyer la spec au client</div></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-title">V2 — Intégrations (mois 3-4)</div>
+  <div class="feature-grid">
+    <div class="feat"><span class="badge v2">V2</span><div class="feat-name">Push Notion</div><div class="feat-desc">Export auto dans une page Notion, structure configurable</div></div>
+    <div class="feat"><span class="badge v2">V2</span><div class="feat-name">Push Jira</div><div class="feat-desc">Crée les Epics + Stories directement dans le projet Jira</div></div>
+    <div class="feat"><span class="badge v2">V2</span><div class="feat-name">Diagrammes de flux</div><div class="feat-desc">Génération Mermaid auto depuis la spec (user flows)</div></div>
+    <div class="feat"><span class="badge v2">V2</span><div class="feat-name">Templates agence</div><div class="feat-desc">Modèles custom par type (e-commerce, vitrine, SaaS…)</div></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-title">V3 — Monétisation & différenciation</div>
+  <div class="feature-grid">
+    <div class="feat"><span class="badge v3">V3</span><div class="feat-name">Workspace équipe</div><div class="feat-desc">Multi-users par agence, rôles chef de projet / dev / client</div></div>
+    <div class="feat"><span class="badge v3">V3</span><div class="feat-name">Chiffrage auto</div><div class="feat-desc">Estimation de jours/coût par feature selon stack déclarée</div></div>
+    <div class="feat"><span class="badge v3">V3</span><div class="feat-name">Validation client</div><div class="feat-desc">Le client commente et signe électroniquement la spec</div></div>
+    <div class="feat"><span class="badge v3">V3</span><div class="feat-name">Historique de versions</div><div class="feat-desc">Diff visuel entre deux versions de la spec</div></div>
+  </div>
+</div>
+
+</div>
