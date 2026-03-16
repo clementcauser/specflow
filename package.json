@@ -11,6 +11,7 @@
     "cypress:run": "cypress run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "better-auth": "^1.5.5",
@@ -22,6 +23,7 @@
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
     "resend": "^6.9.3",
     "server-only": "^0.0.1",
     "shadcn": "^4.0.8",
