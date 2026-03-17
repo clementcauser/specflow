@@ -135,3 +135,51 @@ export async function getMonthlySpecsCount(organizationId: string) {
     },
   });
 }
+
+const updateSpecSchema = z.object({
+  specId: z.string(),
+  title: z.string().min(2).max(100),
+  projectType: z.string().min(1),
+  stack: z.string().min(1),
+  content: z.any(), // content can include arbitrary sections + _sections array
+});
+
+export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
+  const session = await requireSession();
+  const parsed = updateSpecSchema.parse(data);
+
+  // Get the spec and verify user has access via their organization
+  const spec = await prisma.spec.findUnique({
+    where: { id: parsed.specId },
+  });
+
+  if (!spec) throw new Error("Spec introuvable");
+
+  const member = await prisma.member.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id,
+        organizationId: spec.organizationId,
+      },
+    },
+  });
+  
+  if (!member) throw new Error("Accès refusé");
+
+  const updatedSpec = await prisma.spec.update({
+    where: { id: parsed.specId },
+    data: {
+      title: parsed.title,
+      projectType: parsed.projectType,
+      stack: parsed.stack,
+      content: parsed.content,
+    },
+  });
+
+  revalidatePath(`/specs/${parsed.specId}`);
+  revalidatePath(`/specs/${parsed.specId}/edit`);
+  revalidatePath("/specs");
+  revalidatePath("/dashboard");
+  
+  return updatedSpec;
+}

@@ -17,7 +17,12 @@ export default async function GenerateSpecPage({
 
   return (
     <div className="max-w-3xl mx-auto">
-      <SpecGenerator spec={spec} />
+      <SpecGenerator
+        spec={{
+          ...spec,
+          content: spec.content as Record<string, unknown> | null,
+        }}
+      />
     </div>
   );
 }

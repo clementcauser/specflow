@@ -94,6 +94,9 @@ export function SpecList({ specs }: SpecListProps) {
                     <DropdownMenuItem asChild>
                       <Link href={`/specs/${spec.id}`}>Voir les détails</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/specs/${spec.id}/edit`}>Modifier</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive">
                       Supprimer
                     </DropdownMenuItem>
