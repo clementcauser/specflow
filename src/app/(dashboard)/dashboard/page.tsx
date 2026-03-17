@@ -2,12 +2,15 @@ import { getSessionWithOrg } from "@/lib/session";
 import { getActiveOrganization } from "@/actions/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getMonthlySpecsCount } from "@/actions/specs";
 import { FileText, Users, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
   const { session, user } = await getSessionWithOrg();
   const activeOrg = await getActiveOrganization();
+
+  const monthlyCount = activeOrg ? await getMonthlySpecsCount(activeOrg.id) : 0;
 
   const firstName = session.user.name.split(" ")[0];
 
@@ -32,9 +35,11 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-semibold">0</p>
+            <p className="text-2xl font-semibold">{monthlyCount}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Aucune spec générée
+              {monthlyCount > 0
+                ? `${monthlyCount} spec${monthlyCount > 1 ? "s" : ""} générée${monthlyCount > 1 ? "s" : ""}`
+                : "Aucune spec générée"}
             </p>
           </CardContent>
         </Card>

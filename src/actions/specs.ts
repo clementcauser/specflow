@@ -13,6 +13,7 @@ const createSpecSchema = z.object({
     .string()
     .min(20, "Décrivez le projet en au moins 20 caractères"),
   organizationId: z.string(),
+  sections: z.array(z.string()).default([]),
 });
 
 export async function createSpec(data: z.infer<typeof createSpecSchema>) {
@@ -32,9 +33,14 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
 
   const spec = await prisma.spec.create({
     data: {
-      ...parsed,
+      title: parsed.title,
+      projectType: parsed.projectType,
+      stack: parsed.stack,
+      description: parsed.description,
+      organizationId: parsed.organizationId,
       creatorId: session.user.id,
       status: "draft",
+      content: { _sections: parsed.sections },
     },
   });
 
@@ -99,5 +105,32 @@ export async function updateSpecContent(
   return prisma.spec.update({
     where: { id: specId },
     data: { content, status },
+  });
+}
+
+export async function getMonthlySpecsCount(organizationId: string) {
+  const session = await requireSession();
+
+  // Vérifie l'accès
+  const member = await prisma.member.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: session.user.id,
+        organizationId,
+      },
+    },
+  });
+  if (!member) return 0;
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  return prisma.spec.count({
+    where: {
+      organizationId,
+      createdAt: {
+        gte: startOfMonth,
+      },
+    },
   });
 }

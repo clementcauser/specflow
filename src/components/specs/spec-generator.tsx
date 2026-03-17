@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
+  SECTIONS_CONFIG,
   SECTIONS_ORDER,
   SECTION_LABELS,
   type SpecSection,
@@ -28,6 +29,7 @@ type Props = {
     stack: string;
     description: string;
     status: string;
+    content: Record<string, unknown> | null;
   };
 };
 
@@ -35,10 +37,21 @@ type SectionState = "pending" | "generating" | "done" | "error";
 
 export function SpecGenerator({ spec }: Props) {
   const router = useRouter();
+
+  // Derive active sections from stored _sections; fallback to all
+  const storedSections = Array.isArray(spec.content?.["_sections"])
+    ? (spec.content["_sections"] as SpecSection[])
+    : null;
+  const activeSections: SpecSection[] = storedSections
+    ? SECTIONS_CONFIG.filter(
+        (s) => s.alwaysOn || storedSections.includes(s.key),
+      ).map((s) => s.key)
+    : SECTIONS_ORDER;
+
   const [sectionStates, setSectionStates] = useState<
     Record<SpecSection, SectionState>
   >(
-    Object.fromEntries(SECTIONS_ORDER.map((s) => [s, "pending"])) as Record<
+    Object.fromEntries(activeSections.map((s) => [s, "pending"])) as Record<
       SpecSection,
       SectionState
     >,
@@ -173,7 +186,7 @@ export function SpecGenerator({ spec }: Props) {
 
       {/* Progression */}
       <div className="flex gap-3 flex-wrap">
-        {SECTIONS_ORDER.map((section) => (
+        {activeSections.map((section) => (
           <div
             key={section}
             className={cn(
@@ -193,7 +206,7 @@ export function SpecGenerator({ spec }: Props) {
 
       {/* Sections */}
       <div className="space-y-4">
-        {SECTIONS_ORDER.map((section) => {
+        {activeSections.map((section) => {
           const state = sectionStates[section];
           const sectionContent = content[section];
           const isActive = activeSection === section;

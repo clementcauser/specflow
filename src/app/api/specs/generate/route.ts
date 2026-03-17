@@ -3,19 +3,29 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
-import { SECTIONS_ORDER, type SpecSection } from "@/types/spec";
+import { SECTIONS_CONFIG, SECTIONS_ORDER, type SpecSection } from "@/types/spec";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const client = new Anthropic();
 
-function buildPrompt(spec: {
-  title: string;
-  projectType: string;
-  stack: string;
-  description: string;
-}): string {
+function buildPrompt(
+  spec: {
+    title: string;
+    projectType: string;
+    stack: string;
+    description: string;
+  },
+  requestedSections: SpecSection[],
+): string {
+  const sectionsToGenerate = SECTIONS_CONFIG.filter(
+    (s) => s.alwaysOn || requestedSections.includes(s.key),
+  );
+
+  const sectionCount = sectionsToGenerate.length;
+  const sectionList = sectionsToGenerate.map((s) => s.prompt).join("\n\n");
+
   return `Tu es un expert en rédaction de spécifications fonctionnelles pour agences web.
 
 Génère une spécification technique complète et professionnelle pour le projet suivant :
@@ -25,41 +35,9 @@ Génère une spécification technique complète et professionnelle pour le proje
 **Stack technique :** ${spec.stack}
 **Description du besoin :** ${spec.description}
 
-Génère EXACTEMENT les 6 sections suivantes, dans cet ordre, en utilisant EXACTEMENT ces balises de séparation :
+Génère EXACTEMENT les ${sectionCount} sections suivantes, dans cet ordre, en utilisant EXACTEMENT ces balises de séparation :
 
-[SECTION:summary]
-Résumé exécutif en 3-4 phrases professionnelles. Présente l'objectif du projet, la cible utilisateur et la valeur apportée.
-
-[SECTION:personas]
-Identifie 2 à 3 personas pertinents. Pour chaque persona : nom, rôle, objectifs, frustrations actuelles. Format Markdown structuré.
-
-[SECTION:userStories]
-Liste de user stories priorisées avec la méthode MoSCoW. Format :
-**MUST HAVE**
-- En tant que [persona], je veux [action] afin de [bénéfice]
-**SHOULD HAVE**
-- ...
-**COULD HAVE**
-- ...
-**WON'T HAVE**
-- ...
-
-[SECTION:acceptance]
-Critères d'acceptance au format Gherkin pour les 5 user stories MUST HAVE les plus importantes.
-Format :
-**Story : [titre]**
-Given [contexte]
-When [action]
-Then [résultat attendu]
-
-[SECTION:outOfScope]
-Liste explicite de ce qui est HORS périmètre de ce projet. Minimum 5 éléments. Sois précis et contextuel au projet.
-
-[SECTION:questions]
-Liste de 5 à 8 questions de clarification importantes à poser au client, avec pour chacune l'impact sur la spec si non clarifiée.
-Format :
-- **Question :** [question]
-  **Impact :** [impact si non répondu]
+${sectionList}
 
 Réponds uniquement avec le contenu des sections, sans introduction ni conclusion. Commence directement par [SECTION:summary].`;
 }
@@ -75,6 +53,20 @@ export async function POST(request: NextRequest) {
   // Récupère la spec
   const spec = await prisma.spec.findUnique({ where: { id: specId } });
   if (!spec) return new Response("Spec not found", { status: 404 });
+
+  // Détermine les sections demandées (stockées dans content._sections)
+  const storedContent = spec.content as Record<string, unknown> | null;
+  const requestedSections: SpecSection[] = Array.isArray(
+    storedContent?.["_sections"],
+  )
+    ? (storedContent["_sections"] as SpecSection[])
+    : []; // Si undefined, par défaut on n'a que le summary (qui est alwaysOn de toute façon) ou on peut faire un fallback if needed.
+  
+  // Actually, if _sections is totally undefined, it might be an old spec.
+  if (!storedContent || !Array.isArray(storedContent["_sections"])) {
+    // Fallback for older specs
+    requestedSections.push(...SECTIONS_ORDER.filter((s) => s !== "summary"));
+  }
 
   // Vérifie accès
   const member = await prisma.member.findUnique({
@@ -105,7 +97,7 @@ export async function POST(request: NextRequest) {
         const anthropicStream = await client.messages.stream({
           model: "claude-sonnet-4-5",
           max_tokens: 8000,
-          messages: [{ role: "user", content: buildPrompt(spec) }],
+          messages: [{ role: "user", content: buildPrompt(spec, requestedSections) }],
         });
 
         let fullText = "";
