@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/specs", label: "Mes specs", icon: FileText },
-  { href: "/teams", label: "Équipes", icon: Users },
+  { href: "/workspaces", label: "Espaces", icon: Users },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];
 

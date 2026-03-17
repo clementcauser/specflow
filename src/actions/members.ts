@@ -2,8 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import type { Role } from "@/types/teams";
-import { canManageRole } from "@/types/teams";
+import type { Role } from "@/types/workspaces";
+import { canManageRole } from "@/types/workspaces";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -12,17 +12,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function getMemberRole(
   userId: string,
-  orgId: string,
+  workspaceId: string,
 ): Promise<Role | null> {
   const m = await prisma.member.findUnique({
-    where: { userId_organizationId: { userId, organizationId: orgId } },
+    where: { userId_workspaceId: { userId, workspaceId } },
     select: { role: true },
   });
   return (m?.role as Role) ?? null;
 }
 
-async function assertRole(userId: string, orgId: string, required: Role[]) {
-  const role = await getMemberRole(userId, orgId);
+async function assertRole(
+  userId: string,
+  workspaceId: string,
+  required: Role[],
+) {
+  const role = await getMemberRole(userId, workspaceId);
   if (!role || !required.includes(role))
     throw new Error("Permission insuffisante");
   return role as Role;
@@ -36,11 +40,11 @@ const inviteSchema = z.object({
 });
 
 export async function inviteMember(
-  orgId: string,
+  workspaceId: string,
   data: z.infer<typeof inviteSchema>,
 ) {
   const session = await requireSession();
-  const actorRole = await assertRole(session.user.id, orgId, [
+  const actorRole = await assertRole(session.user.id, workspaceId, [
     "owner",
     "admin",
   ]);
@@ -51,7 +55,7 @@ export async function inviteMember(
   }
 
   const existing = await prisma.member.findFirst({
-    where: { organizationId: orgId, user: { email: parsed.email } },
+    where: { workspaceId, user: { email: parsed.email } },
   });
   if (existing) throw new Error("Cet utilisateur est déjà membre");
 
@@ -60,7 +64,7 @@ export async function inviteMember(
 
   const invitation = await prisma.invitation.upsert({
     where: {
-      organizationId_email: { organizationId: orgId, email: parsed.email },
+      workspaceId_email: { workspaceId, email: parsed.email },
     },
     update: {
       role: parsed.role,
@@ -69,7 +73,7 @@ export async function inviteMember(
       inviterId: session.user.id,
     },
     create: {
-      organizationId: orgId,
+      workspaceId,
       email: parsed.email,
       role: parsed.role,
       status: "pending",
@@ -78,8 +82,8 @@ export async function inviteMember(
     },
   });
 
-  const org = await prisma.organization.findUniqueOrThrow({
-    where: { id: orgId },
+  const workspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: workspaceId },
     select: { name: true },
   });
 
@@ -95,11 +99,11 @@ export async function inviteMember(
       process.env.NODE_ENV === "development"
         ? process.env.DEV_EMAIL_TO!
         : parsed.email,
-    subject: `Invitation à rejoindre ${org.name}`,
+    subject: `Invitation à rejoindre ${workspace.name}`,
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
         <h2 style="font-size:20px;font-weight:600;margin-bottom:16px">
-          Vous avez été invité à rejoindre ${org.name}
+          Vous avez été invité à rejoindre ${workspace.name}
         </h2>
         <p style="color:#555;margin-bottom:24px">
           Cliquez sur le bouton ci-dessous pour accepter l'invitation.
@@ -107,36 +111,39 @@ export async function inviteMember(
         </p>
         <a href="${inviteUrl}"
            style="display:inline-block;background:#18181b;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500">
-          Rejoindre l'équipe
+          Rejoindre l'espace de travail
         </a>
       </div>
     `,
   });
 
-  revalidatePath("/settings/teams");
+  revalidatePath("/settings/workspaces");
 }
 
-export async function cancelInvitation(orgId: string, invitationId: string) {
+export async function cancelInvitation(
+  workspaceId: string,
+  invitationId: string,
+) {
   const session = await requireSession();
-  await assertRole(session.user.id, orgId, ["owner", "admin"]);
+  await assertRole(session.user.id, workspaceId, ["owner", "admin"]);
 
   await prisma.invitation.update({
-    where: { id: invitationId, organizationId: orgId },
+    where: { id: invitationId, workspaceId },
     data: { status: "cancelled" },
   });
 
-  revalidatePath("/settings/teams");
+  revalidatePath("/settings/workspaces");
 }
 
 // ─── Rôles ─────────────────────────────────────────────────────────────────
 
 export async function updateMemberRole(
-  orgId: string,
+  workspaceId: string,
   memberId: string,
   newRole: Role,
 ) {
   const session = await requireSession();
-  const actorRole = await assertRole(session.user.id, orgId, [
+  const actorRole = await assertRole(session.user.id, workspaceId, [
     "owner",
     "admin",
   ]);
@@ -158,14 +165,14 @@ export async function updateMemberRole(
     data: { role: newRole },
   });
 
-  revalidatePath("/settings/teams");
+  revalidatePath("/settings/workspaces");
 }
 
 // ─── Suppression ───────────────────────────────────────────────────────────
 
-export async function removeMember(orgId: string, memberId: string) {
+export async function removeMember(workspaceId: string, memberId: string) {
   const session = await requireSession();
-  const actorRole = await assertRole(session.user.id, orgId, [
+  const actorRole = await assertRole(session.user.id, workspaceId, [
     "owner",
     "admin",
   ]);
@@ -176,7 +183,7 @@ export async function removeMember(orgId: string, memberId: string) {
   });
 
   if (target.userId === session.user.id)
-    throw new Error("Utilisez 'Quitter l'équipe' à la place");
+    throw new Error("Utilisez 'Quitter l'espace de travail' à la place");
   if (!canManageRole(actorRole, target.role as Role))
     throw new Error("Permission insuffisante");
   if (target.role === "owner")
@@ -184,23 +191,23 @@ export async function removeMember(orgId: string, memberId: string) {
 
   await prisma.member.delete({ where: { id: memberId } });
 
-  revalidatePath("/settings/teams");
+  revalidatePath("/settings/workspaces");
 }
 
-export async function leaveTeam(orgId: string) {
+export async function leaveWorkspace(workspaceId: string) {
   const session = await requireSession();
-  const role = await getMemberRole(session.user.id, orgId);
+  const role = await getMemberRole(session.user.id, workspaceId);
   if (!role) throw new Error("Vous n'êtes pas membre");
   if (role === "owner")
     throw new Error("Transférez la propriété avant de quitter");
 
   await prisma.member.delete({
     where: {
-      userId_organizationId: { userId: session.user.id, organizationId: orgId },
+      userId_workspaceId: { userId: session.user.id, workspaceId },
     },
   });
 
-  revalidatePath("/settings/teams");
+  revalidatePath("/settings/workspaces");
 }
 
 export async function acceptInvitation(token: string) {
@@ -228,7 +235,7 @@ export async function acceptInvitation(token: string) {
     prisma.member.create({
       data: {
         userId: session.user.id,
-        organizationId: invitation.organizationId,
+        workspaceId: invitation.workspaceId,
         role: invitation.role,
       },
     }),

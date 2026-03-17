@@ -1,10 +1,10 @@
-import { getActiveOrganization } from "@/actions/tenant";
+import { getActiveWorkspace } from "@/actions/tenant";
 import { redirect } from "next/navigation";
 import { NewSpecForm } from "@/components/specs/new-spec-form";
 
 export default async function NewSpecPage() {
-  const activeOrg = await getActiveOrganization();
-  if (!activeOrg) redirect("/onboarding");
+  const activeWorkspace = await getActiveWorkspace();
+  if (!activeWorkspace) redirect("/onboarding");
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -15,7 +15,7 @@ export default async function NewSpecPage() {
           secondes.
         </p>
       </div>
-      <NewSpecForm organizationId={activeOrg.id} />
+      <NewSpecForm workspaceId={activeWorkspace.id} />
     </div>
   );
 }

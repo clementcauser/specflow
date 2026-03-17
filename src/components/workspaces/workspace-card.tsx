@@ -1,10 +1,10 @@
-// src/components/teams/team-card.tsx
+// src/components/workspaces/workspace-card.tsx
 "use client";
 
 import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { switchActiveOrganization } from "@/actions/tenant";
+import { switchActiveWorkspace } from "@/actions/tenant";
 import {
   Card,
   CardContent,
@@ -15,11 +15,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { ROLE_LABELS, PLAN_LABELS } from "@/types/teams";
-import type { Role, Plan } from "@/types/teams";
+import { ROLE_LABELS, PLAN_LABELS } from "@/types/workspaces";
+import type { Role, Plan } from "@/types/workspaces";
 
 type Props = {
-  team: {
+  workspace: {
     id: string;
     name: string;
     slug: string;
@@ -31,14 +31,14 @@ type Props = {
   isActive?: boolean;
 };
 
-export function TeamCard({ team, isActive }: Props) {
+export function WorkspaceCard({ workspace, isActive }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const role = team.members[0]?.role as Role;
+  const role = workspace.members[0]?.role as Role;
 
   function handleSwitch() {
     startTransition(async () => {
-      await switchActiveOrganization(team.id);
+      await switchActiveWorkspace(workspace.id);
       router.refresh();
     });
   }
@@ -48,26 +48,26 @@ export function TeamCard({ team, isActive }: Props) {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">
-            {team.name}
+            {workspace.name}
             {isActive && (
               <span className="inline-flex items-center gap-1 text-xs font-normal text-primary">
-                <Check className="h-3 w-3" /> Active
+                <Check className="h-3 w-3" /> Actif
               </span>
             )}
           </CardTitle>
           <Badge variant="secondary">
-            {PLAN_LABELS[team.plan as Plan] ?? team.plan}
+            {PLAN_LABELS[workspace.plan as Plan] ?? workspace.plan}
           </Badge>
         </div>
-        {team.description && (
+        {workspace.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">
-            {team.description}
+            {workspace.description}
           </p>
         )}
       </CardHeader>
 
       <CardContent className="text-sm text-muted-foreground">
-        {team._count.members} membre{team._count.members > 1 ? "s" : ""} ·{" "}
+        {workspace._count.members} membre{workspace._count.members > 1 ? "s" : ""} ·{" "}
         <span className="text-foreground font-medium">{ROLE_LABELS[role]}</span>
       </CardContent>
 
@@ -89,7 +89,7 @@ export function TeamCard({ team, isActive }: Props) {
           size="sm"
           className="flex-1"
         >
-          <Link href={`/settings/teams/${team.id}`}>Gérer</Link>
+          <Link href={`/settings/workspaces/${workspace.id}`}>Gérer</Link>
         </Button>
       </CardFooter>
     </Card>

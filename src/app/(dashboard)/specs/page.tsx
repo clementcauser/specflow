@@ -2,15 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Plus } from "lucide-react";
 import Link from "next/link";
-import { getSessionWithOrg } from "@/lib/session";
+import { getSessionWithWorkspace } from "@/lib/session";
 import { getSpecs } from "@/actions/specs";
 import { SpecList } from "@/components/specs/spec-list";
 
 export default async function SpecsPage() {
-  const { user } = await getSessionWithOrg();
-  const activeOrgId = user.activeOrganizationId ?? user.memberships[0].organization.id;
+  const { user } = await getSessionWithWorkspace();
+  const activeWorkspaceId = user.activeWorkspaceId ?? user.memberships[0].workspace.id;
   
-  const specs = await getSpecs(activeOrgId);
+  const specs = await getSpecs(activeWorkspaceId);
 
   return (
     <div className="space-y-6 max-w-5xl">

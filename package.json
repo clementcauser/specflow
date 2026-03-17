@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:open": "cypress open --browser chrome",
+    "cypress:run": "cypress run --browser chrome"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",

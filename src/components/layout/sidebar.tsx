@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { switchActiveOrganization } from "@/actions/tenant";
+import { switchActiveWorkspace } from "@/actions/tenant";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -29,26 +29,26 @@ import {
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/specs", label: "Mes specs", icon: FileText },
-  { href: "/teams", label: "Mes équipes", icon: Users },
+  { href: "/workspaces", label: "Mes espaces", icon: Users },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];
 
-type Org = { id: string; name: string; slug: string; plan: string };
+type Workspace = { id: string; name: string; slug: string; plan: string };
 
 type Props = {
   user: { name: string; email: string; image?: string | null };
-  activeOrg: Org;
-  teams: Org[];
+  activeWorkspace: Workspace;
+  workspaces: Workspace[];
 };
 
-export function Sidebar({ user, activeOrg, teams }: Props) {
+export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleSwitch(orgId: string) {
+  function handleSwitch(workspaceId: string) {
     startTransition(async () => {
-      await switchActiveOrganization(orgId);
+      await switchActiveWorkspace(workspaceId);
       router.refresh();
     });
   }
@@ -60,7 +60,7 @@ export function Sidebar({ user, activeOrg, teams }: Props) {
         <span className="font-semibold text-base tracking-tight">SpecFlow</span>
       </div>
 
-      {/* Team switcher */}
+      {/* Workspace switcher */}
       <div className="px-3 py-3 border-b">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -72,40 +72,40 @@ export function Sidebar({ user, activeOrg, teams }: Props) {
               <div className="flex items-center gap-2 min-w-0">
                 <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-medium text-primary">
-                    {activeOrg.name[0]?.toUpperCase()}
+                    {activeWorkspace.name[0]?.toUpperCase()}
                   </span>
                 </div>
-                <span className="truncate text-sm">{activeOrg.name}</span>
+                <span className="truncate text-sm">{activeWorkspace.name}</span>
               </div>
               <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
             <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-              Mes équipes
+              Mes espaces de travail
             </DropdownMenuLabel>
-            {teams.map((team) => (
+            {workspaces.map((workspace) => (
               <DropdownMenuItem
-                key={team.id}
-                onSelect={() => handleSwitch(team.id)}
+                key={workspace.id}
+                onSelect={() => handleSwitch(workspace.id)}
                 className="gap-2"
               >
                 <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-medium text-primary">
-                    {team.name[0]?.toUpperCase()}
+                    {workspace.name[0]?.toUpperCase()}
                   </span>
                 </div>
-                <span className="flex-1 truncate">{team.name}</span>
-                {team.id === activeOrg.id && (
+                <span className="flex-1 truncate">{workspace.name}</span>
+                {workspace.id === activeWorkspace.id && (
                   <Check className="h-3.5 w-3.5 text-primary" />
                 )}
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/settings/teams" className="gap-2">
+              <Link href="/settings/workspaces" className="gap-2">
                 <Plus className="h-4 w-4" />
-                Nouvelle équipe
+                Nouvel espace de travail
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

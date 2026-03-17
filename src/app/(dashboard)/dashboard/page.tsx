@@ -1,5 +1,5 @@
-import { getSessionWithOrg } from "@/lib/session";
-import { getActiveOrganization } from "@/actions/tenant";
+import { getSessionWithWorkspace } from "@/lib/session";
+import { getActiveWorkspace } from "@/actions/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getMonthlySpecsCount, getSpecs } from "@/actions/specs";
@@ -8,11 +8,11 @@ import { FileText, Users, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
-  const { session, user } = await getSessionWithOrg();
-  const activeOrg = await getActiveOrganization();
+  const { session, user } = await getSessionWithWorkspace();
+  const activeWorkspace = await getActiveWorkspace();
 
-  const monthlyCount = activeOrg ? await getMonthlySpecsCount(activeOrg.id) : 0;
-  const latestSpecs = activeOrg ? await getSpecs(activeOrg.id, 4) : [];
+  const monthlyCount = activeWorkspace ? await getMonthlySpecsCount(activeWorkspace.id) : 0;
+  const latestSpecs = activeWorkspace ? await getSpecs(activeWorkspace.id, 4) : [];
 
   const firstName = session.user.name.split(" ")[0];
 
@@ -22,9 +22,9 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold">Bonjour, {firstName} 👋</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {activeOrg
-            ? `Vous travaillez dans l'équipe "${activeOrg.name}".`
-            : "Sélectionnez une équipe pour commencer."}
+          {activeWorkspace
+            ? `Vous travaillez dans l'espace de travail "${activeWorkspace.name}".`
+            : "Sélectionnez un espace de travail pour commencer."}
         </p>
       </div>
 
@@ -49,15 +49,15 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Membres de l&apos;équipe
+              Membres de l&apos;espace
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold">
-              {activeOrg?.members.length ?? "—"}
+              {activeWorkspace?.members.length ?? "—"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {activeOrg ? `Plan ${activeOrg.plan}` : "Aucune équipe active"}
+              {activeWorkspace ? `Plan ${activeWorkspace.plan}` : "Aucun espace actif"}
             </p>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Mes équipes
+              Mes espaces
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -103,13 +103,13 @@ export default async function DashboardPage() {
           </Card>
 
           <Card className="group hover:border-primary/50 transition-colors cursor-pointer">
-            <Link href="/teams">
+            <Link href="/workspaces">
               <CardContent className="flex items-center gap-4 p-4">
                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">Gérer l&apos;équipe</p>
+                  <p className="font-medium text-sm">Gérer l&apos;espace</p>
                   <p className="text-xs text-muted-foreground">
                     Membres, rôles, paramètres
                   </p>

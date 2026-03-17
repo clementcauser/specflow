@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateTeam } from "@/actions/teams";
+import { updateWorkspace } from "@/actions/workspaces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +21,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plan } from "@/types/teams";
+import { Plan } from "@/types/workspaces";
 
 type Props = {
-  team: {
+  workspace: {
     id: string;
     name: string;
     slug: string;
@@ -34,11 +34,11 @@ type Props = {
   canEdit: boolean;
 };
 
-export function TeamSettingsForm({ team, canEdit }: Props) {
+export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [plan, setPlan] = useState(team.plan);
+  const [plan, setPlan] = useState(workspace.plan);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -49,7 +49,7 @@ export function TeamSettingsForm({ team, canEdit }: Props) {
 
     startTransition(async () => {
       try {
-        await updateTeam(team.id, {
+        await updateWorkspace(workspace.id, {
           name: form.get("name") as string,
           slug: form.get("slug") as string,
           description: (form.get("description") as string) || undefined,
@@ -67,7 +67,7 @@ export function TeamSettingsForm({ team, canEdit }: Props) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Informations de l&apos;équipe
+          Informations de l&apos;espace de travail
         </CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -77,7 +77,7 @@ export function TeamSettingsForm({ team, canEdit }: Props) {
             <Input
               id="name"
               name="name"
-              defaultValue={team.name}
+              defaultValue={workspace.name}
               disabled={!canEdit}
               required
             />
@@ -87,7 +87,7 @@ export function TeamSettingsForm({ team, canEdit }: Props) {
             <Input
               id="slug"
               name="slug"
-              defaultValue={team.slug}
+              defaultValue={workspace.slug}
               disabled={!canEdit}
               required
             />
@@ -97,7 +97,7 @@ export function TeamSettingsForm({ team, canEdit }: Props) {
             <Textarea
               id="description"
               name="description"
-              defaultValue={team.description ?? ""}
+              defaultValue={workspace.description ?? ""}
               disabled={!canEdit}
               rows={3}
             />

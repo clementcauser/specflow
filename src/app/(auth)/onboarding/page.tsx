@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createTeam } from "@/actions/teams";
-import { switchActiveOrganization } from "@/actions/tenant";
+import { createWorkspace } from "@/actions/workspaces";
+import { switchActiveWorkspace } from "@/actions/tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,12 +35,12 @@ export default function OnboardingPage() {
 
     startTransition(async () => {
       try {
-        const org = await createTeam({
+        const workspace = await createWorkspace({
           name: form.get("name") as string,
           slug: form.get("slug") as string,
           plan: "free",
         });
-        await switchActiveOrganization(org.id);
+        await switchActiveWorkspace(workspace.id);
         router.push("/dashboard");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
@@ -55,26 +55,26 @@ export default function OnboardingPage() {
         <div className="text-center space-y-1">
           <h1 className="text-2xl font-semibold">Bienvenue sur SpecFlow</h1>
           <p className="text-muted-foreground text-sm">
-            Commencez par créer votre première équipe.
+            Commencez par créer votre premier espace de travail.
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Créer une équipe</CardTitle>
+            <CardTitle className="text-base">Créer un espace de travail</CardTitle>
             <CardDescription>
-              Une équipe regroupe vos projets et membres. Vous pourrez en créer
+              Un espace de travail regroupe vos projets et membres. Vous pourrez en créer
               d&apos;autres plus tard.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <Label htmlFor="name">Nom de l&apos;équipe</Label>
+                <Label htmlFor="name">Nom de l&apos;espace de travail</Label>
                 <Input
                   id="name"
                   name="name"
-                  placeholder="Mon agence"
+                  placeholder="Mon espace"
                   required
                   onChange={(e) => setSlug(slugify(e.target.value))}
                 />

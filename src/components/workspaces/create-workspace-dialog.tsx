@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createTeam } from "@/actions/teams";
+import { createWorkspace } from "@/actions/workspaces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plan } from "@/types/teams";
+import { Plan } from "@/types/workspaces";
 
 function slugify(value: string) {
   return value
@@ -30,7 +30,7 @@ function slugify(value: string) {
     .replace(/[^a-z0-9-]/g, "");
 }
 
-export function CreateTeamDialog() {
+export function CreateWorkspaceDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +49,7 @@ export function CreateTeamDialog() {
 
     startTransition(async () => {
       try {
-        await createTeam({
+        await createWorkspace({
           name: form.get("name") as string,
           slug: form.get("slug") as string,
           description: (form.get("description") as string) || undefined,
@@ -66,15 +66,15 @@ export function CreateTeamDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Créer une équipe</Button>
+        <Button>Créer un espace de travail</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouvelle équipe</DialogTitle>
+          <DialogTitle>Nouvel espace de travail</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-1">
-            <Label htmlFor="name">Nom de l&apos;équipe</Label>
+            <Label htmlFor="name">Nom de l&apos;espace de travail</Label>
             <Input
               id="name"
               name="name"
@@ -102,7 +102,7 @@ export function CreateTeamDialog() {
             <Textarea
               id="description"
               name="description"
-              placeholder="Décrivez votre équipe…"
+              placeholder="Décrivez votre espace de travail…"
               rows={2}
             />
           </div>
@@ -129,7 +129,7 @@ export function CreateTeamDialog() {
               Annuler
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Création…" : "Créer l'équipe"}
+              {isPending ? "Création…" : "Créer l'espace de travail"}
             </Button>
           </div>
         </form>

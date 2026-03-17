@@ -12,7 +12,7 @@ const createSpecSchema = z.object({
   description: z
     .string()
     .min(20, "Décrivez le projet en au moins 20 caractères"),
-  organizationId: z.string(),
+  workspaceId: z.string(),
   sections: z.array(z.string()).default([]),
 });
 
@@ -20,12 +20,12 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   const session = await requireSession();
   const parsed = createSpecSchema.parse(data);
 
-  // Vérifie que l'user est bien membre de l'org
+  // Vérifie que l'user est bien membre du workspace
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId: parsed.organizationId,
+        workspaceId: parsed.workspaceId,
       },
     },
   });
@@ -37,7 +37,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
       projectType: parsed.projectType,
       stack: parsed.stack,
       description: parsed.description,
-      organizationId: parsed.organizationId,
+      workspaceId: parsed.workspaceId,
       creatorId: session.user.id,
       status: "draft",
       content: { _sections: parsed.sections },
@@ -48,21 +48,21 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   return spec;
 }
 
-export async function getSpecs(organizationId: string, limit?: number) {
+export async function getSpecs(workspaceId: string, limit?: number) {
   const session = await requireSession();
 
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId,
+        workspaceId,
       },
     },
   });
   if (!member) throw new Error("Accès refusé");
 
   return prisma.spec.findMany({
-    where: { organizationId },
+    where: { workspaceId },
     orderBy: { createdAt: "desc" },
     ...(limit ? { take: limit } : {}),
     select: {
@@ -82,14 +82,14 @@ export async function getSpec(specId: string) {
 
   const spec = await prisma.spec.findUniqueOrThrow({
     where: { id: specId },
-    include: { organization: true },
+    include: { workspace: true },
   });
 
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId: spec.organizationId,
+        workspaceId: spec.workspaceId,
       },
     },
   });
@@ -109,15 +109,15 @@ export async function updateSpecContent(
   });
 }
 
-export async function getMonthlySpecsCount(organizationId: string) {
+export async function getMonthlySpecsCount(workspaceId: string) {
   const session = await requireSession();
 
   // Vérifie l'accès
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId,
+        workspaceId,
       },
     },
   });
@@ -128,7 +128,7 @@ export async function getMonthlySpecsCount(organizationId: string) {
 
   return prisma.spec.count({
     where: {
-      organizationId,
+      workspaceId,
       createdAt: {
         gte: startOfMonth,
       },
@@ -148,7 +148,7 @@ export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
   const session = await requireSession();
   const parsed = updateSpecSchema.parse(data);
 
-  // Get the spec and verify user has access via their organization
+  // Get the spec and verify user has access via their workspace
   const spec = await prisma.spec.findUnique({
     where: { id: parsed.specId },
   });
@@ -157,9 +157,9 @@ export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
 
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId: spec.organizationId,
+        workspaceId: spec.workspaceId,
       },
     },
   });

@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function InviteMemberDialog({ orgId }: { orgId: string }) {
+export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +35,7 @@ export function InviteMemberDialog({ orgId }: { orgId: string }) {
 
     startTransition(async () => {
       try {
-        await inviteMember(orgId, {
+        await inviteMember(workspaceId, {
           email: form.get("email") as string,
           role: role as "admin" | "member",
         });

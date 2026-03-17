@@ -14,16 +14,16 @@ export async function requireSession() {
   return session;
 }
 
-export async function getSessionWithOrg() {
+export async function getSessionWithWorkspace() {
   const session = await requireSession();
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: session.user.id },
     select: {
-      activeOrganizationId: true,
+      activeWorkspaceId: true,
       memberships: {
         include: {
-          organization: {
+          workspace: {
             select: { id: true, name: true, slug: true, plan: true },
           },
         },

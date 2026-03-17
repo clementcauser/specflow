@@ -1,7 +1,7 @@
 import { getSpec } from "@/actions/specs";
 import { EditSpecForm } from "@/components/specs/edit-spec-form";
 
-import { getSessionWithOrg } from "@/lib/session";
+import { getSessionWithWorkspace } from "@/lib/session";
 import { notFound } from "next/navigation";
 
 export default async function EditSpecPage({
@@ -10,7 +10,7 @@ export default async function EditSpecPage({
   params: Promise<{ specId: string }>;
 }) {
   const { specId } = await params;
-  await getSessionWithOrg();
+  await getSessionWithWorkspace();
   const spec = await getSpec(specId);
 
   // Security check: ensure user is the creator or has access via org (handled by getSpec)

@@ -71,9 +71,9 @@ export async function POST(request: NextRequest) {
   // Vérifie accès
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId: spec.organizationId,
+        workspaceId: spec.workspaceId,
       },
     },
   });

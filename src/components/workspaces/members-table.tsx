@@ -6,7 +6,7 @@ import {
   removeMember,
   updateMemberRole,
   cancelInvitation,
-  leaveTeam,
+  leaveWorkspace,
 } from "@/actions/members";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { canManageRole, ROLE_LABELS } from "@/types/teams";
-import type { Role } from "@/types/teams";
+import { canManageRole, ROLE_LABELS } from "@/types/workspaces";
+import type { Role } from "@/types/workspaces";
 
 type Member = {
   id: string;
@@ -48,7 +48,7 @@ type Props = {
   invitations: Invitation[];
   currentUserId: string;
   currentRole: Role;
-  orgId: string;
+  workspaceId: string;
 };
 
 export function MembersTable({
@@ -56,35 +56,35 @@ export function MembersTable({
   invitations,
   currentUserId,
   currentRole,
-  orgId,
+  workspaceId,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleRoleChange(memberId: string, role: string) {
     startTransition(async () => {
-      await updateMemberRole(orgId, memberId, role as Role);
+      await updateMemberRole(workspaceId, memberId, role as Role);
       router.refresh();
     });
   }
 
   function handleRemove(memberId: string) {
     startTransition(async () => {
-      await removeMember(orgId, memberId);
+      await removeMember(workspaceId, memberId);
       router.refresh();
     });
   }
 
   function handleLeave() {
     startTransition(async () => {
-      await leaveTeam(orgId);
-      router.push("/settings/teams");
+      await leaveWorkspace(workspaceId);
+      router.push("/settings/workspaces");
     });
   }
 
   function handleCancelInvite(invitationId: string) {
     startTransition(async () => {
-      await cancelInvitation(orgId, invitationId);
+      await cancelInvitation(workspaceId, invitationId);
       router.refresh();
     });
   }

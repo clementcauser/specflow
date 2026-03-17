@@ -16,7 +16,7 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  activeOrganizationId String? // ← tenant actif
+  activeWorkspaceId String? // ← tenant actif
 
   sessions    Session[]
   accounts    Account[]
@@ -34,7 +34,7 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  activeOrganizationId String?
+  activeWorkspaceId String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -67,7 +67,7 @@ model Verification {
 }
 
 // --- Multi-tenant tables ---
-model Organization {
+model Workspace {
   id          String   @id @default(cuid())
   name        String
   slug        String   @unique
@@ -86,44 +86,44 @@ model Organization {
 model Member {
   id             String   @id @default(cuid())
   userId         String
-  organizationId String
+  workspaceId    String
   role           String   @default("member") // owner | admin | member
   createdAt      DateTime @default(now())
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, organizationId])
+  @@unique([userId, workspaceId])
 }
 
 model Invitation {
-  id             String   @id @default(cuid())
-  organizationId String
-  email          String
-  role           String   @default("member")
-  status         String   @default("pending") // pending | accepted | rejected | cancelled
-  expiresAt      DateTime
-  inviterId      String
-  createdAt      DateTime @default(now())
+  id          String   @id @default(cuid())
+  workspaceId String
+  email       String
+  role        String   @default("member")
+  status      String   @default("pending") // pending | accepted | rejected | cancelled
+  expiresAt   DateTime
+  inviterId   String
+  createdAt   DateTime @default(now())
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  @@unique([organizationId, email])
+  @@unique([workspaceId, email])
 }
 
 model Spec {
-  id             String   @id @default(cuid())
-  organizationId String
-  creatorId      String
-  title          String
-  projectType    String
-  stack          String
-  description    String   @db.Text
-  status         String   @default("draft") // draft | generating | done | error
-  content        Json? // sections générées
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          String   @id @default(cuid())
+  workspaceId String
+  creatorId   String
+  title       String
+  projectType String
+  stack       String
+  description String   @db.Text
+  status      String   @default("draft") // draft | generating | done | error
+  content     Json? // sections générées
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  creator      User         @relation(fields: [creatorId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User      @relation(fields: [creatorId], references: [id])
 }

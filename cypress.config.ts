@@ -33,11 +33,11 @@ export default defineConfig({
             include: { memberships: true },
           });
           if (user) {
-            // Delete organizations where this user was a member
+            // Delete workspaces where this user was a member
             for (const membership of user.memberships) {
-              await prisma.organization.delete({
-                where: { id: membership.organizationId },
-              });
+              await prisma.workspace.delete({
+                where: { id: membership.workspaceId },
+              }).catch(() => {}); // ignore if already deleted or other issues
             }
             // Finally delete the user ( cascade will handle sessions, accounts, memberships )
             await prisma.user.delete({

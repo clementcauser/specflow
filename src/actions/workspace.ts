@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { z } from "zod";
 
-const createOrgSchema = z.object({
+const createWorkspaceSchema = z.object({
   name: z.string().min(2).max(50),
   slug: z
     .string()
@@ -14,17 +14,17 @@ const createOrgSchema = z.object({
     .regex(/^[a-z0-9-]+$/),
 });
 
-export async function createOrganization(
-  data: z.infer<typeof createOrgSchema>,
+export async function createWorkspace(
+  data: z.infer<typeof createWorkspaceSchema>,
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) throw new Error("Non authentifié");
 
-  const parsed = createOrgSchema.safeParse(data);
+  const parsed = createWorkspaceSchema.safeParse(data);
   if (!parsed.success) throw new Error("Données invalides");
 
-  const org = await prisma.organization.create({
+  const workspace = await prisma.workspace.create({
     data: {
       name: parsed.data.name,
       slug: parsed.data.slug,
@@ -37,5 +37,5 @@ export async function createOrganization(
     },
   });
 
-  return org;
+  return workspace;
 }

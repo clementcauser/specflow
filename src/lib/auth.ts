@@ -52,7 +52,28 @@ export const auth = betterAuth({
 
   plugins: [
     organization({
+      tableName: "workspace",
       allowUserToCreateOrganization: true,
+      schema: {
+        organization: {
+          modelName: "workspace",
+        },
+        member: {
+          fields: {
+            organizationId: "workspaceId",
+          },
+        },
+        invitation: {
+          fields: {
+            organizationId: "workspaceId",
+          },
+        },
+        session: {
+          fields: {
+            activeOrganizationId: "activeWorkspaceId",
+          },
+        },
+      },
     }),
     magicLink({
       sendMagicLink: async ({ email, url }) => {

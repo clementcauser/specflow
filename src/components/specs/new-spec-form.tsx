@@ -30,7 +30,7 @@ const STEPS = [
   { step: 3, label: "Description" },
 ];
 
-export function NewSpecForm({ organizationId }: { organizationId: string }) {
+export function NewSpecForm({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [error, setError] = useState("");
@@ -81,7 +81,7 @@ export function NewSpecForm({ organizationId }: { organizationId: string }) {
           projectType: form.projectType === "autre" ? form.customProjectType.trim() : form.projectType,
           stack: form.stack.join(", "),
           description: form.description,
-          organizationId,
+          workspaceId,
           sections: form.sections,
         });
         router.push(`/specs/${spec.id}/generate`);

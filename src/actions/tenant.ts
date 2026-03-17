@@ -4,41 +4,41 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
-export async function switchActiveOrganization(orgId: string) {
+export async function switchActiveWorkspace(workspaceId: string) {
   const session = await requireSession();
 
   // Vérifie que l'utilisateur est bien membre
   const member = await prisma.member.findUnique({
     where: {
-      userId_organizationId: {
+      userId_workspaceId: {
         userId: session.user.id,
-        organizationId: orgId,
+        workspaceId: workspaceId,
       },
     },
   });
 
-  if (!member) throw new Error("Vous n'êtes pas membre de cette équipe");
+  if (!member) throw new Error("Vous n'êtes pas membre de cet espace de travail");
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { activeOrganizationId: orgId },
+    data: { activeWorkspaceId: workspaceId },
   });
 
   revalidatePath("/", "layout");
 }
 
-export async function getActiveOrganization() {
+export async function getActiveWorkspace() {
   const session = await requireSession();
 
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: session.user.id },
-    select: { activeOrganizationId: true },
+    select: { activeWorkspaceId: true },
   });
 
-  if (!user.activeOrganizationId) return null;
+  if (!user.activeWorkspaceId) return null;
 
-  return prisma.organization.findUnique({
-    where: { id: user.activeOrganizationId },
+  return prisma.workspace.findUnique({
+    where: { id: user.activeWorkspaceId },
     include: {
       members: {
         where: { userId: session.user.id },
