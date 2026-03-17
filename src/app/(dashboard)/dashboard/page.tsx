@@ -2,7 +2,8 @@ import { getSessionWithOrg } from "@/lib/session";
 import { getActiveOrganization } from "@/actions/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getMonthlySpecsCount } from "@/actions/specs";
+import { getMonthlySpecsCount, getSpecs } from "@/actions/specs";
+import { SpecList } from "@/components/specs/spec-list";
 import { FileText, Users, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -11,6 +12,7 @@ export default async function DashboardPage() {
   const activeOrg = await getActiveOrganization();
 
   const monthlyCount = activeOrg ? await getMonthlySpecsCount(activeOrg.id) : 0;
+  const latestSpecs = activeOrg ? await getSpecs(activeOrg.id, 4) : [];
 
   const firstName = session.user.name.split(" ")[0];
 
@@ -119,7 +121,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Dernières specs — placeholder */}
+      {/* Dernières specs */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium text-muted-foreground">
@@ -129,20 +131,24 @@ export default async function DashboardPage() {
             <Link href="/specs">Voir tout</Link>
           </Button>
         </div>
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <FileText className="h-8 w-8 text-muted-foreground/50 mb-3" />
-            <p className="text-sm font-medium">
-              Aucune spec pour l&apos;instant
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Générez votre première spec en quelques secondes.
-            </p>
-            <Button size="sm" className="mt-4" asChild>
-              <Link href="/specs/new">Créer une spec</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {latestSpecs.length > 0 ? (
+          <SpecList specs={latestSpecs} />
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <FileText className="h-8 w-8 text-muted-foreground/50 mb-3" />
+              <p className="text-sm font-medium">
+                Aucune spec pour l&apos;instant
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Générez votre première spec en quelques secondes.
+              </p>
+              <Button size="sm" className="mt-4" asChild>
+                <Link href="/specs/new">Créer une spec</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

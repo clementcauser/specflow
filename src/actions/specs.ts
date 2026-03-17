@@ -48,7 +48,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   return spec;
 }
 
-export async function getSpecs(organizationId: string) {
+export async function getSpecs(organizationId: string, limit?: number) {
   const session = await requireSession();
 
   const member = await prisma.member.findUnique({
@@ -64,6 +64,7 @@ export async function getSpecs(organizationId: string) {
   return prisma.spec.findMany({
     where: { organizationId },
     orderBy: { createdAt: "desc" },
+    ...(limit ? { take: limit } : {}),
     select: {
       id: true,
       title: true,
