@@ -42,11 +42,15 @@ describe("Onboarding Workflow", () => {
 
     const workspaceName = "Test Workspace " + Math.random().toString(36).substring(7);
     cy.get("#name").type(workspaceName);
+    cy.get('button').contains("Continuer").click();
 
-    // Wait for slug to be generated
-    cy.get("#slug").should("not.have.value", "");
+    // Step 2: Profil
+    cy.contains("Freelance").click();
+    cy.get('button').contains("Continuer").click();
 
-    cy.get('button[type="submit"]').contains("Créer et continuer").click();
+    // Step 3: Produits
+    cy.contains("E-commerce").click();
+    cy.get('button').contains("Créer et continuer").click();
 
     // Redirection to dashboard
     cy.url().should("include", "/dashboard");
@@ -60,6 +64,6 @@ describe("Onboarding Workflow", () => {
     // User requested: "quand mon espace de travail est créé alors j'ai accès à la page onboarding"
     cy.visit("/onboarding");
     cy.url().should("include", "/onboarding");
-    cy.contains("Créer un espace de travail").should("be.visible");
+    cy.contains("Bienvenue sur SpecFlow").should("be.visible");
   });
 });

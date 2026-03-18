@@ -35,7 +35,7 @@ export function CreateWorkspaceDialog() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [slug, setSlug] = useState("");
-  const [plan, setPlan] = useState("free");
+  const [plan, setPlan] = useState("FREE");
   const [isPending, startTransition] = useTransition();
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -54,6 +54,8 @@ export function CreateWorkspaceDialog() {
           slug: form.get("slug") as string,
           description: (form.get("description") as string) || undefined,
           plan: plan as Plan,
+          productType: [],
+          profileType: undefined,
         });
         setOpen(false);
         router.refresh();
@@ -113,9 +115,9 @@ export function CreateWorkspaceDialog() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="free">Gratuit</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
-                <SelectItem value="enterprise">Entreprise</SelectItem>
+                <SelectItem value="FREE">Gratuit</SelectItem>
+                <SelectItem value="PRO">Pro</SelectItem>
+                <SelectItem value="ENTERPRISE">Entreprise</SelectItem>
               </SelectContent>
             </Select>
           </div>

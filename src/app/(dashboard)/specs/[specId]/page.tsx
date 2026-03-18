@@ -36,8 +36,8 @@ export default async function SpecPage({
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-2xl font-semibold">{spec.title}</h1>
-          <Badge variant={spec.status === "done" ? "default" : "secondary"}>
-            {spec.status === "done" ? "Générée" : spec.status}
+          <Badge variant={spec.status === "DONE" ? "default" : "secondary"}>
+            {spec.status === "DONE" ? "Générée" : spec.status}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">

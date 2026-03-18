@@ -3,12 +3,47 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
-import { SECTIONS_CONFIG, SECTIONS_ORDER, type SpecSection } from "@/types/spec";
+import {
+  SECTIONS_CONFIG,
+  SECTIONS_ORDER,
+  type SpecSection,
+} from "@/types/spec";
+import {
+  SpecStatus,
+  WorkspaceProductType,
+  WorkspaceProfileType,
+} from "@prisma/client";
+import {
+  WORKSPACE_PRODUCT_TYPE_LABELS,
+  WORKSPACE_PROFILE_TYPE_LABELS,
+} from "@/types/workspaces";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const client = new Anthropic();
+
+function buildWorkspaceContext(workspace: {
+  name: string;
+  profileType: WorkspaceProfileType;
+  productType: WorkspaceProductType[];
+}): string {
+  const profileLabel =
+    WORKSPACE_PROFILE_TYPE_LABELS[workspace.profileType] ??
+    workspace.profileType;
+
+  const productsList = workspace.productType
+    .map((p) => WORKSPACE_PRODUCT_TYPE_LABELS[p] ?? p)
+    .join(", ");
+
+  const lines = [
+    `- Workspace : ${workspace.name}`,
+    profileLabel ? `- Profil : ${profileLabel}` : null,
+    productsList ? `- Produits : ${productsList}` : null,
+  ].filter(Boolean);
+
+  return `[CONTEXTE WORKSPACE]\n${lines.join("\n")}\n[/CONTEXTE WORKSPACE]`;
+}
 
 function buildPrompt(
   spec: {
@@ -18,6 +53,7 @@ function buildPrompt(
     description: string;
   },
   requestedSections: SpecSection[],
+  workspaceContext: string,
 ): string {
   const sectionsToGenerate = SECTIONS_CONFIG.filter(
     (s) => s.alwaysOn || requestedSections.includes(s.key),
@@ -26,7 +62,9 @@ function buildPrompt(
   const sectionCount = sectionsToGenerate.length;
   const sectionList = sectionsToGenerate.map((s) => s.prompt).join("\n\n");
 
-  return `Tu es un expert en rédaction de spécifications fonctionnelles pour agences web.
+  return `${workspaceContext}
+  
+Tu es un expert en rédaction de spécifications fonctionnelles pour agences web.
 
 Génère une spécification technique complète et professionnelle pour le projet suivant :
 
@@ -51,7 +89,10 @@ export async function POST(request: NextRequest) {
   if (!specId) return new Response("specId required", { status: 400 });
 
   // Récupère la spec
-  const spec = await prisma.spec.findUnique({ where: { id: specId } });
+  const spec = await prisma.spec.findUnique({
+    where: { id: specId },
+    include: { workspace: true },
+  });
   if (!spec) return new Response("Spec not found", { status: 404 });
 
   // Détermine les sections demandées (stockées dans content._sections)
@@ -61,7 +102,7 @@ export async function POST(request: NextRequest) {
   )
     ? (storedContent["_sections"] as SpecSection[])
     : []; // Si undefined, par défaut on n'a que le summary (qui est alwaysOn de toute façon) ou on peut faire un fallback if needed.
-  
+
   // Actually, if _sections is totally undefined, it might be an old spec.
   if (!storedContent || !Array.isArray(storedContent["_sections"])) {
     // Fallback for older specs
@@ -82,8 +123,10 @@ export async function POST(request: NextRequest) {
   // Passe en statut "generating"
   await prisma.spec.update({
     where: { id: specId },
-    data: { status: "generating" },
+    data: { status: SpecStatus.GENERATING },
   });
+
+  const workspaceContext = buildWorkspaceContext(spec.workspace);
 
   // Stream SSE
   const encoder = new TextEncoder();
@@ -97,7 +140,12 @@ export async function POST(request: NextRequest) {
         const anthropicStream = await client.messages.stream({
           model: "claude-sonnet-4-5",
           max_tokens: 8000,
-          messages: [{ role: "user", content: buildPrompt(spec, requestedSections) }],
+          messages: [
+            {
+              role: "user",
+              content: buildPrompt(spec, requestedSections, workspaceContext),
+            },
+          ],
         });
 
         let fullText = "";
@@ -170,14 +218,14 @@ export async function POST(request: NextRequest) {
         // Sauvegarde en BDD
         await prisma.spec.update({
           where: { id: specId },
-          data: { content: sections, status: "done" },
+          data: { content: sections, status: SpecStatus.DONE },
         });
 
         send({ type: "done" });
       } catch {
         await prisma.spec.update({
           where: { id: specId },
-          data: { status: "error" },
+          data: { status: SpecStatus.ERROR },
         });
         send({ type: "error", message: "Erreur lors de la génération" });
       } finally {

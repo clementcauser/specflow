@@ -7,6 +7,7 @@ import { WorkspaceSettingsForm } from "@/components/workspaces/workspace-setting
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
+import { WorkspaceRole } from "@prisma/client";
 
 export default async function WorkspaceDetailPage({
   params,
@@ -19,9 +20,13 @@ export default async function WorkspaceDetailPage({
     requireSession(),
   ]);
 
-  const currentMember = workspace.members.find((m) => m.userId === session.user.id)!;
-  const isOwner = currentMember.role === "owner";
-  const canManage = ["owner", "admin"].includes(currentMember.role);
+  const currentMember = workspace.members.find(
+    (m) => m.userId === session.user.id,
+  )!;
+  const isOwner = currentMember.role === WorkspaceRole.OWNER;
+  const canManage =
+    currentMember.role === WorkspaceRole.OWNER ||
+    currentMember.role === WorkspaceRole.ADMIN;
 
   return (
     <div className="space-y-6">
@@ -30,7 +35,12 @@ export default async function WorkspaceDetailPage({
           <h1 className="text-2xl font-semibold">{workspace.name}</h1>
           <p className="text-sm text-muted-foreground mt-1">{workspace.slug}</p>
         </div>
-        {isOwner && <DeleteWorkspaceDialog workspaceId={workspace.id} workspaceName={workspace.name} />}
+        {isOwner && (
+          <DeleteWorkspaceDialog
+            workspaceId={workspace.id}
+            workspaceName={workspace.name}
+          />
+        )}
       </div>
 
       <Tabs defaultValue="settings">

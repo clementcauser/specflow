@@ -6,6 +6,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
+import {
+  InvitationStatus,
+  WorkspacePlan,
+  WorkspaceProductType,
+  WorkspaceProfileType,
+  WorkspaceRole,
+} from "@prisma/client";
 
 // ─── Schemas de validation ────────────────────────────────────────────────
 
@@ -20,7 +27,11 @@ const workspaceSchema = z.object({
       "Uniquement des lettres minuscules, chiffres et tirets",
     ),
   description: z.string().max(200).optional(),
-  plan: z.enum(["free", "pro", "enterprise"]).default("free"),
+  plan: z.nativeEnum(WorkspacePlan).default(WorkspacePlan.FREE),
+  profileType: z.lazy(() => z.nativeEnum(WorkspaceProfileType).optional()),
+  productType: z.lazy(() =>
+    z.array(z.nativeEnum(WorkspaceProductType)).default([]),
+  ),
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -50,26 +61,36 @@ async function assertRole(
 
 // ─── Actions ──────────────────────────────────────────────────────────────
 
-export async function createWorkspace(data: z.infer<typeof workspaceSchema>) {
+export async function createWorkspace(_data: z.infer<typeof workspaceSchema>) {
   const session = await requireSession();
-  const parsed = workspaceSchema.parse(data);
+  const { data, success } = workspaceSchema.safeParse(_data);
+
+  if (!success) {
+    throw new Error("Données invalides");
+  }
 
   const existing = await prisma.workspace.findUnique({
-    where: { slug: parsed.slug },
+    where: { slug: data.slug },
   });
   if (existing) throw new Error("Ce slug est déjà utilisé");
 
-  const workspace = await prisma.workspace.create({
+  const organization = await prisma.workspace.create({
     data: {
-      ...parsed,
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      plan: data.plan,
+      profileType: (data.profileType ||
+        WorkspaceProfileType.PERSONAL) as WorkspaceProfileType,
+      productType: data.productType as WorkspaceProductType[],
       members: {
-        create: { userId: session.user.id, role: "owner" },
+        create: { userId: session.user.id, role: WorkspaceRole.OWNER },
       },
     },
   });
 
   revalidatePath("/settings/workspaces");
-  return workspace;
+  return organization;
 }
 
 export async function updateWorkspace(
@@ -77,7 +98,10 @@ export async function updateWorkspace(
   data: Partial<z.infer<typeof workspaceSchema>>,
 ) {
   const session = await requireSession();
-  await assertRole(session.user.id, workspaceId, ["owner", "admin"]);
+  await assertRole(session.user.id, workspaceId, [
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
+  ]);
 
   const parsed = workspaceSchema.partial().parse(data);
 
@@ -99,7 +123,7 @@ export async function updateWorkspace(
 
 export async function deleteWorkspace(workspaceId: string) {
   const session = await requireSession();
-  await assertRole(session.user.id, workspaceId, ["owner"]);
+  await assertRole(session.user.id, workspaceId, [WorkspaceRole.OWNER]);
 
   const memberCount = await prisma.member.count({
     where: { workspaceId },
@@ -134,7 +158,11 @@ export async function getUserWorkspaces() {
 
 export async function getWorkspaceWithMembers(workspaceId: string) {
   const session = await requireSession();
-  await assertRole(session.user.id, workspaceId, ["owner", "admin", "member"]);
+  await assertRole(session.user.id, workspaceId, [
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
+    WorkspaceRole.MEMBER,
+  ]);
 
   return prisma.workspace.findUniqueOrThrow({
     where: { id: workspaceId },
@@ -146,7 +174,7 @@ export async function getWorkspaceWithMembers(workspaceId: string) {
         orderBy: { createdAt: "asc" },
       },
       invitations: {
-        where: { status: "pending" },
+        where: { status: InvitationStatus.PENDING },
         orderBy: { createdAt: "desc" },
       },
     },

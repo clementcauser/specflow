@@ -39,7 +39,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
       description: parsed.description,
       workspaceId: parsed.workspaceId,
       creatorId: session.user.id,
-      status: "draft",
+      status: "DRAFT",
       content: { _sections: parsed.sections },
     },
   });
@@ -101,7 +101,7 @@ export async function getSpec(specId: string) {
 export async function updateSpecContent(
   specId: string,
   content: Record<string, string>,
-  status: "done" | "error",
+  status: "DONE" | "ERROR",
 ) {
   return prisma.spec.update({
     where: { id: specId },

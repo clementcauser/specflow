@@ -89,7 +89,7 @@ export function MembersTable({
     });
   }
 
-  const canManage = ["owner", "admin"].includes(currentRole);
+  const canManage = ["OWNER", "ADMIN"].includes(currentRole);
 
   return (
     <div className="space-y-6">
@@ -144,8 +144,8 @@ export function MembersTable({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">Administrateur</SelectItem>
-                        <SelectItem value="member">Membre</SelectItem>
+                        <SelectItem value="ADMIN">Administrateur</SelectItem>
+                        <SelectItem value="MEMBER">Membre</SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
@@ -153,7 +153,7 @@ export function MembersTable({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {isSelf && currentRole !== "owner" && (
+                  {isSelf && currentRole !== "OWNER" && (
                     <Button
                       size="sm"
                       variant="ghost"

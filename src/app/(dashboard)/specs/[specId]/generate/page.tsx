@@ -10,7 +10,7 @@ export default async function GenerateSpecPage({
   const spec = await getSpec(specId);
 
   // Si déjà générée, redirect vers la page de visualisation
-  if (spec.status === "done") {
+  if (spec.status === "DONE") {
     const { redirect } = await import("next/navigation");
     redirect(`/specs/${specId}`);
   }

@@ -16,12 +16,11 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  activeWorkspaceId String? // ← tenant actif
-
-  sessions    Session[]
-  accounts    Account[]
-  memberships Member[]
-  specs       Spec[]
+  activeWorkspaceId String?
+  sessions          Session[]
+  accounts          Account[]
+  memberships       Member[]
+  specs             Spec[]
 }
 
 model Session {
@@ -68,27 +67,62 @@ model Verification {
 
 // --- Multi-tenant tables ---
 model Workspace {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String        @unique
   description String?
-  plan        String   @default("free") // free | pro | enterprise
+  plan        WorkspacePlan @default(FREE)
   logo        String?
   metadata    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   members     Member[]
   invitations Invitation[]
   specs       Spec[]
+  productType WorkspaceProductType[]
+  profileType WorkspaceProfileType
+}
+
+enum WorkspacePlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum WorkspaceProfileType {
+  INTERNAL
+  FREELANCE
+  STARTUP
+  AGENCY
+  PERSONAL
+}
+
+enum WorkspaceProductType {
+  ECOMMERCE
+  SAAS
+  MARKETPLACE
+  LANDING_PAGE
+  MOBILE
+  DESKTOP
+  API
+  IOT
+  AI
+  OTHER
 }
 
 model Member {
-  id             String   @id @default(cuid())
-  userId         String
-  workspaceId    String
-  role           String   @default("member") // owner | admin | member
-  createdAt      DateTime @default(now())
+  id          String        @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -97,33 +131,47 @@ model Member {
 }
 
 model Invitation {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   workspaceId String
   email       String
-  role        String   @default("member")
-  status      String   @default("pending") // pending | accepted | rejected | cancelled
+  role        WorkspaceRole    @default(MEMBER)
+  status      InvitationStatus @default(PENDING)
   expiresAt   DateTime
   inviterId   String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime         @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, email])
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
 model Spec {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   workspaceId String
   creatorId   String
   title       String
   projectType String
   stack       String
-  description String   @db.Text
-  status      String   @default("draft") // draft | generating | done | error
+  description String     @db.Text
+  status      SpecStatus @default(DRAFT)
   content     Json? // sections générées
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   creator   User      @relation(fields: [creatorId], references: [id])
+}
+
+enum SpecStatus {
+  DRAFT
+  GENERATING
+  DONE
+  ERROR
 }

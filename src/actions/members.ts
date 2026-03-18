@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import type { Role } from "@/types/workspaces";
 import { canManageRole } from "@/types/workspaces";
+import { InvitationStatus, WorkspaceRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -35,8 +36,10 @@ async function assertRole(
 // ─── Invitation ────────────────────────────────────────────────────────────
 
 const inviteSchema = z.object({
-  email: z.email(),
-  role: z.enum(["admin", "member"]).default("member"),
+  email: z.string().email(),
+  role: z
+    .enum([WorkspaceRole.ADMIN, WorkspaceRole.MEMBER])
+    .default(WorkspaceRole.MEMBER),
 });
 
 export async function inviteMember(
@@ -45,8 +48,8 @@ export async function inviteMember(
 ) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "owner",
-    "admin",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
   const parsed = inviteSchema.parse(data);
 
@@ -68,7 +71,7 @@ export async function inviteMember(
     },
     update: {
       role: parsed.role,
-      status: "pending",
+      status: InvitationStatus.PENDING,
       expiresAt,
       inviterId: session.user.id,
     },
@@ -76,7 +79,7 @@ export async function inviteMember(
       workspaceId,
       email: parsed.email,
       role: parsed.role,
-      status: "pending",
+      status: InvitationStatus.PENDING,
       expiresAt,
       inviterId: session.user.id,
     },
@@ -90,11 +93,7 @@ export async function inviteMember(
   const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite?token=${invitation.id}`;
 
   await resend.emails.send({
-    from:
-      // process.env.NODE_ENV === "production"
-      //   ? process.env.EMAIL_FROM!
-      //   :
-      "Specflow <onboarding@resend.dev>",
+    from: "Specflow <onboarding@resend.dev>",
     to:
       process.env.NODE_ENV === "development"
         ? process.env.DEV_EMAIL_TO!
@@ -125,11 +124,14 @@ export async function cancelInvitation(
   invitationId: string,
 ) {
   const session = await requireSession();
-  await assertRole(session.user.id, workspaceId, ["owner", "admin"]);
+  await assertRole(session.user.id, workspaceId, [
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
+  ]);
 
   await prisma.invitation.update({
     where: { id: invitationId, workspaceId },
-    data: { status: "cancelled" },
+    data: { status: InvitationStatus.CANCELLED },
   });
 
   revalidatePath("/settings/workspaces");
@@ -144,8 +146,8 @@ export async function updateMemberRole(
 ) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "owner",
-    "admin",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
 
   const target = await prisma.member.findUniqueOrThrow({
@@ -173,8 +175,8 @@ export async function updateMemberRole(
 export async function removeMember(workspaceId: string, memberId: string) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "owner",
-    "admin",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
 
   const target = await prisma.member.findUniqueOrThrow({
@@ -186,7 +188,7 @@ export async function removeMember(workspaceId: string, memberId: string) {
     throw new Error("Utilisez 'Quitter l'espace de travail' à la place");
   if (!canManageRole(actorRole, target.role as Role))
     throw new Error("Permission insuffisante");
-  if (target.role === "owner")
+  if (target.role === WorkspaceRole.OWNER)
     throw new Error("Impossible de retirer le propriétaire");
 
   await prisma.member.delete({ where: { id: memberId } });
@@ -198,7 +200,7 @@ export async function leaveWorkspace(workspaceId: string) {
   const session = await requireSession();
   const role = await getMemberRole(session.user.id, workspaceId);
   if (!role) throw new Error("Vous n'êtes pas membre");
-  if (role === "owner")
+  if (role === WorkspaceRole.OWNER)
     throw new Error("Transférez la propriété avant de quitter");
 
   await prisma.member.delete({
@@ -217,7 +219,7 @@ export async function acceptInvitation(token: string) {
     where: { id: token },
   });
 
-  if (invitation.status !== "pending")
+  if (invitation.status !== InvitationStatus.PENDING)
     throw new Error("Invitation déjà utilisée");
   if (invitation.expiresAt < new Date()) throw new Error("Invitation expirée");
 
@@ -241,7 +243,7 @@ export async function acceptInvitation(token: string) {
     }),
     prisma.invitation.update({
       where: { id: token },
-      data: { status: "accepted" },
+      data: { status: InvitationStatus.ACCEPTED },
     }),
   ]);
 }

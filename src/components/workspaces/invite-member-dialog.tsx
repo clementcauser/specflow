@@ -25,20 +25,20 @@ export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
-  const [role, setRole] = useState("member");
-  const [isPending, startTransition] = useTransition();
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    const form = new FormData(e.currentTarget);
-
-    startTransition(async () => {
-      try {
-        await inviteMember(workspaceId, {
-          email: form.get("email") as string,
-          role: role as "admin" | "member",
-        });
+    const [role, setRole] = useState("MEMBER");
+    const [isPending, startTransition] = useTransition();
+  
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+      e.preventDefault();
+      setError("");
+      const form = new FormData(e.currentTarget);
+  
+      startTransition(async () => {
+        try {
+          await inviteMember(workspaceId, {
+            email: form.get("email") as string,
+            role: role as "ADMIN" | "MEMBER",
+          });
         setOpen(false);
         router.refresh();
       } catch (err: unknown) {
@@ -74,8 +74,8 @@ export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Administrateur</SelectItem>
-                <SelectItem value="member">Membre</SelectItem>
+                <SelectItem value="ADMIN">Administrateur</SelectItem>
+                <SelectItem value="MEMBER">Membre</SelectItem>
               </SelectContent>
             </Select>
           </div>
