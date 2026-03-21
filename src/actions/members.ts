@@ -36,7 +36,7 @@ async function assertRole(
 // ─── Invitation ────────────────────────────────────────────────────────────
 
 const inviteSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   role: z
     .enum([WorkspaceRole.ADMIN, WorkspaceRole.MEMBER])
     .default(WorkspaceRole.MEMBER),
@@ -90,14 +90,15 @@ export async function inviteMember(
     select: { name: true },
   });
 
+  revalidatePath("/settings/workspaces");
+
+  if (process.env.NODE_ENV !== "production") return;
+
   const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite?token=${invitation.id}`;
 
   await resend.emails.send({
     from: "Specflow <onboarding@resend.dev>",
-    to:
-      process.env.NODE_ENV === "development"
-        ? process.env.DEV_EMAIL_TO!
-        : parsed.email,
+    to: parsed.email,
     subject: `Invitation à rejoindre ${workspace.name}`,
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
@@ -115,8 +116,6 @@ export async function inviteMember(
       </div>
     `,
   });
-
-  revalidatePath("/settings/workspaces");
 }
 
 export async function cancelInvitation(

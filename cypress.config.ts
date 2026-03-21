@@ -20,6 +20,8 @@ export default defineConfig({
       });
 
       on("task", {
+        // ─── Utilisateurs ────────────────────────────────────────────────
+
         async verifyUser(email: string) {
           await prisma.user.update({
             where: { email },
@@ -27,27 +29,185 @@ export default defineConfig({
           });
           return null;
         },
+
         async deleteUser(email: string) {
           const user = await prisma.user.findUnique({
             where: { email },
             include: { memberships: true },
           });
           if (user) {
-            // Delete workspaces where this user was a member
             for (const membership of user.memberships) {
-              await prisma.workspace.delete({
-                where: { id: membership.workspaceId },
-              }).catch(() => {}); // ignore if already deleted or other issues
+              await prisma.workspace
+                .delete({ where: { id: membership.workspaceId } })
+                .catch(() => {});
             }
-            // Finally delete the user ( cascade will handle sessions, accounts, memberships )
-            await prisma.user.delete({
-              where: { id: user.id },
-            });
+            await prisma.user.delete({ where: { id: user.id } });
           }
-          // Clean up any pending verifications for this email
           await prisma.verification.deleteMany({
             where: { identifier: email },
           });
+          return null;
+        },
+
+        // ─── Workspaces ───────────────────────────────────────────────────
+
+        async seedWorkspace({
+          ownerEmail,
+          name,
+          slug,
+          type = "AGENCY",
+        }: {
+          ownerEmail: string;
+          name: string;
+          slug: string;
+          type?: string;
+        }) {
+          const user = await prisma.user.findUnique({
+            where: { email: ownerEmail },
+          });
+          if (!user) throw new Error(`Utilisateur ${ownerEmail} introuvable`);
+
+          const workspace = await prisma.workspace.create({
+            data: {
+              name,
+              slug,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              type: type as any,
+              plan: "FREE",
+              members: {
+                create: { userId: user.id, role: "OWNER" },
+              },
+            },
+          });
+          return workspace.id;
+        },
+
+        async getWorkspaceId(slug: string) {
+          const workspace = await prisma.workspace.findUnique({
+            where: { slug },
+          });
+          return workspace?.id ?? null;
+        },
+
+        async deleteWorkspace(slug: string) {
+          await prisma.workspace
+            .delete({ where: { slug } })
+            .catch(() => {});
+          return null;
+        },
+
+        // ─── Membres ──────────────────────────────────────────────────────
+
+        async seedMember({
+          workspaceSlug,
+          memberEmail,
+          role = "MEMBER",
+        }: {
+          workspaceSlug: string;
+          memberEmail: string;
+          role?: string;
+        }) {
+          const [workspace, user] = await Promise.all([
+            prisma.workspace.findUnique({ where: { slug: workspaceSlug } }),
+            prisma.user.findUnique({ where: { email: memberEmail } }),
+          ]);
+          if (!workspace) throw new Error(`Workspace ${workspaceSlug} introuvable`);
+          if (!user) throw new Error(`Utilisateur ${memberEmail} introuvable`);
+
+          await prisma.member.upsert({
+            where: {
+              userId_workspaceId: {
+                userId: user.id,
+                workspaceId: workspace.id,
+              },
+            },
+            create: {
+              userId: user.id,
+              workspaceId: workspace.id,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              role: role as any,
+            },
+            update: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              role: role as any,
+            },
+          });
+          return workspace.id;
+        },
+
+        async removeMember({
+          workspaceSlug,
+          memberEmail,
+        }: {
+          workspaceSlug: string;
+          memberEmail: string;
+        }) {
+          const [workspace, user] = await Promise.all([
+            prisma.workspace.findUnique({ where: { slug: workspaceSlug } }),
+            prisma.user.findUnique({ where: { email: memberEmail } }),
+          ]);
+          if (!workspace || !user) return null;
+
+          await prisma.member
+            .delete({
+              where: {
+                userId_workspaceId: {
+                  userId: user.id,
+                  workspaceId: workspace.id,
+                },
+              },
+            })
+            .catch(() => {});
+          return null;
+        },
+
+        // ─── Invitations ──────────────────────────────────────────────────
+
+        async getPendingInvitation({
+          workspaceSlug,
+          email,
+        }: {
+          workspaceSlug: string;
+          email: string;
+        }) {
+          const workspace = await prisma.workspace.findUnique({
+            where: { slug: workspaceSlug },
+          });
+          if (!workspace) return null;
+
+          const invitation = await prisma.invitation.findUnique({
+            where: {
+              workspaceId_email: {
+                workspaceId: workspace.id,
+                email,
+              },
+            },
+          });
+          return invitation ? { id: invitation.id, status: invitation.status } : null;
+        },
+
+        async deleteInvitation({
+          workspaceSlug,
+          email,
+        }: {
+          workspaceSlug: string;
+          email: string;
+        }) {
+          const workspace = await prisma.workspace.findUnique({
+            where: { slug: workspaceSlug },
+          });
+          if (!workspace) return null;
+
+          await prisma.invitation
+            .delete({
+              where: {
+                workspaceId_email: {
+                  workspaceId: workspace.id,
+                  email,
+                },
+              },
+            })
+            .catch(() => {});
           return null;
         },
       });

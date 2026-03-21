@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cypress:open": "cypress open --browser chrome",
-    "cypress:run": "cypress run --browser chrome"
+    "cypress:open": "start-server-and-test dev http://localhost:3000 cy:open",
+    "cypress:run": "start-server-and-test dev http://localhost:3000 cy:run",
+    "cy:open": "cypress open --browser chrome",
+    "cy:run": "cypress run --browser chrome"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
@@ -43,6 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^7.5.0",
+    "start-server-and-test": "^2.1.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

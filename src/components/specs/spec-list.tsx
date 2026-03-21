@@ -21,10 +21,11 @@ import {
 interface Spec {
   id: string;
   title: string;
-  projectType: string;
-  stack: string;
   status: string;
   createdAt: Date;
+  prompt?: string | null;
+  Project?: { name: string; productType: string } | null;
+  Epic?: { title: string } | null;
   creator: {
     name: string | null;
     image: string | null;
@@ -42,8 +43,7 @@ export function SpecList({ specs }: SpecListProps) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[400px]">Titre</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Stack</TableHead>
+            <TableHead>Contexte</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Créé le</TableHead>
             <TableHead className="text-right"></TableHead>
@@ -70,11 +70,8 @@ export function SpecList({ specs }: SpecListProps) {
                   </div>
                 </Link>
               </TableCell>
-              <TableCell className="text-muted-foreground">
-                {spec.projectType}
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {spec.stack}
+              <TableCell className="text-muted-foreground text-sm">
+                {spec.Project?.name ?? spec.Epic?.title ?? "—"}
               </TableCell>
               <TableCell>
                 <StatusBadge status={spec.status} />
@@ -112,8 +109,8 @@ export function SpecList({ specs }: SpecListProps) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "done":
+  switch (status.toUpperCase()) {
+    case "DONE":
       return (
         <Badge
           variant="secondary"
@@ -122,7 +119,7 @@ function StatusBadge({ status }: { status: string }) {
           Terminé
         </Badge>
       );
-    case "generating":
+    case "GENERATING":
       return (
         <Badge
           variant="secondary"
@@ -131,10 +128,8 @@ function StatusBadge({ status }: { status: string }) {
           Génération...
         </Badge>
       );
-    case "error":
-      return (
-        <Badge variant="destructive">Erreur</Badge>
-      );
+    case "ERROR":
+      return <Badge variant="destructive">Erreur</Badge>;
     default:
       return (
         <Badge

@@ -9,9 +9,11 @@ import { Role } from "@/types/workspaces";
 import {
   InvitationStatus,
   WorkspacePlan,
+  WorkspaceProductStage,
   WorkspaceProductType,
-  WorkspaceProfileType,
   WorkspaceRole,
+  WorkspaceTeamSize,
+  WorkspaceType,
 } from "@prisma/client";
 
 // ─── Schemas de validation ────────────────────────────────────────────────
@@ -26,12 +28,16 @@ const workspaceSchema = z.object({
       /^[a-z0-9-]+$/,
       "Uniquement des lettres minuscules, chiffres et tirets",
     ),
-  description: z.string().max(200).optional(),
+  type: z.nativeEnum(WorkspaceType),
   plan: z.nativeEnum(WorkspacePlan).default(WorkspacePlan.FREE),
-  profileType: z.lazy(() => z.nativeEnum(WorkspaceProfileType).optional()),
-  productType: z.lazy(() =>
-    z.array(z.nativeEnum(WorkspaceProductType)).default([]),
-  ),
+  // AGENCY
+  teamSize: z.nativeEnum(WorkspaceTeamSize).optional(),
+  specialties: z.array(z.nativeEnum(WorkspaceProductType)).default([]),
+  // PRODUCT
+  tagline: z.string().max(150).optional(),
+  productDescription: z.string().max(1000).optional(),
+  techStack: z.string().max(200).optional(),
+  productStage: z.nativeEnum(WorkspaceProductStage).optional(),
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -74,23 +80,25 @@ export async function createWorkspace(_data: z.infer<typeof workspaceSchema>) {
   });
   if (existing) throw new Error("Ce slug est déjà utilisé");
 
-  const organization = await prisma.workspace.create({
+  const workspace = await prisma.workspace.create({
     data: {
       name: data.name,
       slug: data.slug,
-      description: data.description,
+      type: data.type,
       plan: data.plan,
-      profileType: (data.profileType ||
-        WorkspaceProfileType.PERSONAL) as WorkspaceProfileType,
-      productType: data.productType as WorkspaceProductType[],
+      teamSize: data.teamSize,
+      tagline: data.tagline,
+      productDescription: data.productDescription,
+      techStack: data.techStack,
+      productStage: data.productStage,
       members: {
         create: { userId: session.user.id, role: WorkspaceRole.OWNER },
       },
     },
   });
 
-  revalidatePath("/settings/workspaces");
-  return organization;
+  revalidatePath("/workspaces");
+  return workspace;
 }
 
 export async function updateWorkspace(

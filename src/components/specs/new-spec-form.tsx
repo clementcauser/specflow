@@ -76,11 +76,17 @@ export function NewSpecForm({ workspaceId }: { workspaceId: string }) {
     setError("");
     startTransition(async () => {
       try {
+        const projectType = form.projectType === "autre" ? form.customProjectType.trim() : form.projectType;
+        const stack = form.stack.join(", ");
+        const prompt = [
+          projectType && `Type de projet : ${projectType}`,
+          stack && `Stack technique : ${stack}`,
+          form.description,
+        ].filter(Boolean).join("\n\n");
+
         const spec = await createSpec({
           title: form.title,
-          projectType: form.projectType === "autre" ? form.customProjectType.trim() : form.projectType,
-          stack: form.stack.join(", "),
-          description: form.description,
+          prompt,
           workspaceId,
           sections: form.sections,
         });

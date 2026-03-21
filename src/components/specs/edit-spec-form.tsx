@@ -15,8 +15,7 @@ type Props = {
   spec: {
     id: string;
     title: string;
-    projectType: string;
-    stack: string;
+    prompt?: string | null;
     content: Record<string, unknown> | null;
   };
 };
@@ -27,13 +26,11 @@ export function EditSpecForm({ spec }: Props) {
   const [error, setError] = useState("");
 
   const [title, setTitle] = useState(spec.title);
-  const [projectType, setProjectType] = useState(spec.projectType);
-  const [stack, setStack] = useState(spec.stack);
+  const [prompt, setPrompt] = useState(spec.prompt ?? "");
   const [content, setContent] = useState<Record<string, unknown>>(
     spec.content || {}
   );
 
-  // Seules les sections vraiment générées (ie. qui sont du texte dans le JSON)
   const renderedSections = SECTIONS_CONFIG.filter(
     (s) => typeof content[s.key] === "string"
   );
@@ -46,17 +43,12 @@ export function EditSpecForm({ spec }: Props) {
         await updateSpec({
           specId: spec.id,
           title,
-          projectType,
-          stack,
+          prompt: prompt || undefined,
           content,
         });
         router.push(`/specs/${spec.id}`);
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Une erreur est survenue");
-        }
+        setError(err instanceof Error ? err.message : "Une erreur est survenue");
       }
     });
   };
@@ -77,25 +69,14 @@ export function EditSpecForm({ spec }: Props) {
               required
             />
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="projectType">Type de projet</Label>
-              <Input
-                id="projectType"
-                value={projectType}
-                onChange={(e) => setProjectType(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stack">Stack technique</Label>
-              <Input
-                id="stack"
-                value={stack}
-                onChange={(e) => setStack(e.target.value)}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="prompt">Description du besoin</Label>
+            <Textarea
+              id="prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={4}
+            />
           </div>
         </CardContent>
       </Card>

@@ -23,7 +23,6 @@ type Props = {
     id: string;
     name: string;
     slug: string;
-    description: string | null;
     plan: string;
     _count: { members: number };
     members: { role: string }[];
@@ -59,11 +58,6 @@ export function WorkspaceCard({ workspace, isActive }: Props) {
             {PLAN_LABELS[workspace.plan as Plan] ?? workspace.plan}
           </Badge>
         </div>
-        {workspace.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {workspace.description}
-          </p>
-        )}
       </CardHeader>
 
       <CardContent className="text-sm text-muted-foreground">

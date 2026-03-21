@@ -16,11 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import {
-  WorkspacePlan,
-  WorkspaceProductType,
-  WorkspaceProfileType,
-} from "@prisma/client";
+import { WorkspacePlan, WorkspaceType } from "@prisma/client";
 
 function slugify(v: string) {
   return v
@@ -51,8 +47,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [profileType, setProfileType] = useState<string | null>(null);
-  const [productType, setProductType] = useState<string[]>([]);
+  const [workspaceType, setWorkspaceType] = useState<WorkspaceType | null>(null);
+  const [specialties, setSpecialties] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -62,7 +58,7 @@ export default function OnboardingPage() {
   }
 
   function toggleProduct(value: string) {
-    setProductType((prev) =>
+    setSpecialties((prev) =>
       prev.includes(value) ? prev.filter((p) => p !== value) : [...prev, value],
     );
   }
@@ -75,8 +71,8 @@ export default function OnboardingPage() {
           name,
           slug,
           plan: WorkspacePlan.FREE,
-          profileType: profileType as WorkspaceProfileType,
-          productType: productType as WorkspaceProductType[],
+          type: workspaceType ?? WorkspaceType.AGENCY,
+          specialties: [],
         });
         await switchActiveWorkspace(workspace.id);
         router.push("/dashboard");
@@ -203,10 +199,10 @@ export default function OnboardingPage() {
                     <button
                       key={p.value}
                       type="button"
-                      onClick={() => setProfileType(p.value)}
+                      onClick={() => setWorkspaceType(p.value as WorkspaceType)}
                       className={cn(
                         "w-full text-left px-4 py-3 rounded-lg border text-sm font-medium transition-colors",
-                        profileType === p.value
+                        workspaceType === p.value
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-border hover:border-border/80 hover:bg-muted/50",
                       )}
@@ -225,7 +221,7 @@ export default function OnboardingPage() {
                   </Button>
                   <Button
                     className="flex-2"
-                    disabled={!profileType}
+                    disabled={!workspaceType}
                     onClick={() => setStep(3)}
                   >
                     Continuer
@@ -251,7 +247,7 @@ export default function OnboardingPage() {
                       onClick={() => toggleProduct(p.value)}
                       className={cn(
                         "w-full text-left px-4 py-3 rounded-lg border text-sm font-medium transition-colors",
-                        productType.includes(p.value)
+                        specialties.includes(p.value)
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-border hover:border-border/80 hover:bg-muted/50",
                       )}
@@ -272,7 +268,7 @@ export default function OnboardingPage() {
                   <Button
                     className="flex-2"
                     type="submit"
-                    disabled={productType.length === 0 || isPending}
+                    disabled={isPending}
                     onClick={handleSubmit}
                   >
                     {isPending ? "Création…" : "Créer et continuer"}

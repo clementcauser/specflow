@@ -15,6 +15,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
+      if (process.env.NODE_ENV === "test") return;
       await resend.emails.send({
         from: "Specflow <onboarding@resend.dev>",
         to:
@@ -31,6 +32,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
+      if (process.env.NODE_ENV === "test") return;
       await resend.emails.send({
         from: "Specflow <onboarding@resend.dev>",
         to:
@@ -77,7 +79,8 @@ export const auth = betterAuth({
     }),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        await resend.emails.send({
+      if (process.env.NODE_ENV === "test") return;
+      await resend.emails.send({
           from: "Specflow <onboarding@resend.dev>",
           to:
             process.env.NODE_ENV === "development"

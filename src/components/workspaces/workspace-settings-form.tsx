@@ -6,7 +6,6 @@ import { updateWorkspace } from "@/actions/workspaces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -22,13 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Plan } from "@/types/workspaces";
+import { WorkspacePlan } from "@prisma/client";
 
 type Props = {
   workspace: {
     id: string;
     name: string;
     slug: string;
-    description: string | null;
     plan: string;
   };
   canEdit: boolean;
@@ -41,7 +40,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
   const [plan, setPlan] = useState(workspace.plan);
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -52,7 +51,6 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
         await updateWorkspace(workspace.id, {
           name: form.get("name") as string,
           slug: form.get("slug") as string,
-          description: (form.get("description") as string) || undefined,
           plan: plan as Plan,
         });
         setSuccess(true);
@@ -92,16 +90,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
               required
             />
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              defaultValue={workspace.description ?? ""}
-              disabled={!canEdit}
-              rows={3}
-            />
-          </div>
+
           <div className="space-y-1">
             <Label>Plan</Label>
             <Select value={plan} onValueChange={setPlan} disabled={!canEdit}>
@@ -109,9 +98,11 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="free">Gratuit</SelectItem>
-                <SelectItem value="pro">Pro</SelectItem>
-                <SelectItem value="enterprise">Entreprise</SelectItem>
+                <SelectItem value={WorkspacePlan.FREE}>Gratuit</SelectItem>
+                <SelectItem value={WorkspacePlan.PRO}>Pro</SelectItem>
+                <SelectItem value={WorkspacePlan.ENTERPRISE}>
+                  Entreprise
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

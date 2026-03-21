@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { getUserWorkspaces } from "@/actions/workspaces";
-import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-dialog";
 import { WorkspaceCard } from "@/components/workspaces/workspace-card";
+import { Button } from "@/components/ui/button";
 
 export default async function WorkspacesSettingsPage() {
   const workspaces = await getUserWorkspaces();
@@ -14,7 +15,9 @@ export default async function WorkspacesSettingsPage() {
             Gérez vos espaces de travail et les membres associés.
           </p>
         </div>
-        <CreateWorkspaceDialog />
+        <Button asChild>
+          <Link href="/workspaces/new">Créer un espace de travail</Link>
+        </Button>
       </div>
 
       {workspaces.length === 0 ? (

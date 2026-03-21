@@ -7,12 +7,10 @@ import { requireSession } from "@/lib/session";
 
 const createSpecSchema = z.object({
   title: z.string().min(2).max(100),
-  projectType: z.string().min(1),
-  stack: z.string().min(1),
-  description: z
-    .string()
-    .min(20, "Décrivez le projet en au moins 20 caractères"),
+  prompt: z.string().min(20, "Décrivez le projet en au moins 20 caractères"),
   workspaceId: z.string(),
+  projectId: z.string().optional(),
+  epicId: z.string().optional(),
   sections: z.array(z.string()).default([]),
 });
 
@@ -20,7 +18,6 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   const session = await requireSession();
   const parsed = createSpecSchema.parse(data);
 
-  // Vérifie que l'user est bien membre du workspace
   const member = await prisma.member.findUnique({
     where: {
       userId_workspaceId: {
@@ -34,10 +31,10 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   const spec = await prisma.spec.create({
     data: {
       title: parsed.title,
-      projectType: parsed.projectType,
-      stack: parsed.stack,
-      description: parsed.description,
+      prompt: parsed.prompt,
       workspaceId: parsed.workspaceId,
+      projectId: parsed.projectId,
+      epicId: parsed.epicId,
       creatorId: session.user.id,
       status: "DRAFT",
       content: { _sections: parsed.sections },
@@ -68,10 +65,11 @@ export async function getSpecs(workspaceId: string, limit?: number) {
     select: {
       id: true,
       title: true,
-      projectType: true,
-      stack: true,
       status: true,
       createdAt: true,
+      prompt: true,
+      Project: { select: { name: true, productType: true } },
+      Epic: { select: { title: true } },
       creator: { select: { name: true, image: true } },
     },
   });
@@ -84,6 +82,8 @@ export async function getSpec(specId: string) {
     where: { id: specId },
     include: { workspace: true },
   });
+
+  if (!spec.workspaceId) throw new Error("Spec sans workspace");
 
   const member = await prisma.member.findUnique({
     where: {
@@ -112,7 +112,6 @@ export async function updateSpecContent(
 export async function getMonthlySpecsCount(workspaceId: string) {
   const session = await requireSession();
 
-  // Vérifie l'accès
   const member = await prisma.member.findUnique({
     where: {
       userId_workspaceId: {
@@ -129,9 +128,7 @@ export async function getMonthlySpecsCount(workspaceId: string) {
   return prisma.spec.count({
     where: {
       workspaceId,
-      createdAt: {
-        gte: startOfMonth,
-      },
+      createdAt: { gte: startOfMonth },
     },
   });
 }
@@ -139,21 +136,19 @@ export async function getMonthlySpecsCount(workspaceId: string) {
 const updateSpecSchema = z.object({
   specId: z.string(),
   title: z.string().min(2).max(100),
-  projectType: z.string().min(1),
-  stack: z.string().min(1),
-  content: z.any(), // content can include arbitrary sections + _sections array
+  prompt: z.string().optional(),
+  content: z.any(),
 });
 
 export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
   const session = await requireSession();
   const parsed = updateSpecSchema.parse(data);
 
-  // Get the spec and verify user has access via their workspace
   const spec = await prisma.spec.findUnique({
     where: { id: parsed.specId },
   });
-
   if (!spec) throw new Error("Spec introuvable");
+  if (!spec.workspaceId) throw new Error("Spec sans workspace");
 
   const member = await prisma.member.findUnique({
     where: {
@@ -163,15 +158,13 @@ export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
       },
     },
   });
-  
   if (!member) throw new Error("Accès refusé");
 
   const updatedSpec = await prisma.spec.update({
     where: { id: parsed.specId },
     data: {
       title: parsed.title,
-      projectType: parsed.projectType,
-      stack: parsed.stack,
+      prompt: parsed.prompt,
       content: parsed.content,
     },
   });
@@ -180,6 +173,6 @@ export async function updateSpec(data: z.infer<typeof updateSpecSchema>) {
   revalidatePath(`/specs/${parsed.specId}/edit`);
   revalidatePath("/specs");
   revalidatePath("/dashboard");
-  
+
   return updatedSpec;
 }

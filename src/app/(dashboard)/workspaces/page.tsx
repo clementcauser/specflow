@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { getUserWorkspaces } from "@/actions/workspaces";
 import { getActiveWorkspace } from "@/actions/tenant";
 import { WorkspaceCard } from "@/components/workspaces/workspace-card";
-import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-dialog";
+import { Button } from "@/components/ui/button";
 
 export default async function WorkspacesPage() {
   const [workspaces, activeWorkspace] = await Promise.all([
@@ -18,7 +19,9 @@ export default async function WorkspacesPage() {
             Gérez vos espaces de travail et basculez de l&apos;un à l&apos;autre.
           </p>
         </div>
-        <CreateWorkspaceDialog />
+        <Button asChild>
+          <Link href="/workspaces/new">Créer un espace de travail</Link>
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

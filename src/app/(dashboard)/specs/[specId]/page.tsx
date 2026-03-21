@@ -40,9 +40,11 @@ export default async function SpecPage({
             {spec.status === "DONE" ? "Générée" : spec.status}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {spec.projectType} · {spec.stack}
-        </p>
+        {spec.prompt && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {spec.prompt}
+          </p>
+        )}
       </div>
 
       <div className="space-y-4">

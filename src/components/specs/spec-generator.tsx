@@ -25,9 +25,6 @@ type Props = {
   spec: {
     id: string;
     title: string;
-    projectType: string;
-    stack: string;
-    description: string;
     status: string;
     content: Record<string, unknown> | null;
   };
