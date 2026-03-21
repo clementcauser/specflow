@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Settings, Layers } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Settings, Layers, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BASE_NAV_ITEMS = [
@@ -19,7 +19,9 @@ export function BottomNav({ workspaceType }: { workspaceType?: string }) {
     BASE_NAV_ITEMS[0],
     ...(workspaceType === "PRODUCT"
       ? [{ href: "/epics", label: "Epics", icon: Layers }]
-      : []),
+      : workspaceType === "FREELANCE"
+        ? [{ href: "/clients", label: "Clients", icon: Briefcase }]
+        : []),
     ...BASE_NAV_ITEMS.slice(1),
   ];
 

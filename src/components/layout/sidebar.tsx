@@ -25,6 +25,7 @@ import {
   Check,
   Plus,
   Layers,
+  Briefcase,
 } from "lucide-react";
 
 const BASE_NAV_ITEMS = [
@@ -119,7 +120,9 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
           ...BASE_NAV_ITEMS.slice(0, 1),
           ...(activeWorkspace.type === "PRODUCT"
             ? [{ href: "/epics", label: "Epics", icon: Layers }]
-            : []),
+            : activeWorkspace.type === "FREELANCE"
+              ? [{ href: "/clients", label: "Clients", icon: Briefcase }]
+              : []),
           ...BASE_NAV_ITEMS.slice(1),
         ].map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
