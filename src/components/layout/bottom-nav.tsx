@@ -2,23 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Settings } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Settings, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/specs", label: "Mes specs", icon: FileText },
   { href: "/workspaces", label: "Espaces", icon: Users },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];
 
-export function BottomNav() {
+export function BottomNav({ workspaceType }: { workspaceType?: string }) {
   const pathname = usePathname();
+
+  const items = [
+    BASE_NAV_ITEMS[0],
+    ...(workspaceType === "PRODUCT"
+      ? [{ href: "/epics", label: "Epics", icon: Layers }]
+      : []),
+    ...BASE_NAV_ITEMS.slice(1),
+  ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t">
       <div className="flex items-stretch h-16">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link

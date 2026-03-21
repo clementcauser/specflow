@@ -451,7 +451,7 @@ export function CreateWorkspaceFlow() {
           techStack: techStack || undefined,
           productStage: productStage ?? undefined,
         });
-        router.push(`/workspaces`);
+        router.push(type === WorkspaceType.PRODUCT ? `/epics/new` : `/workspaces`);
         router.refresh();
       } catch (err: unknown) {
         setError((err as Error).message);

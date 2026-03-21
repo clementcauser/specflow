@@ -15,13 +15,10 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      if (process.env.NODE_ENV === "test") return;
+      if (process.env.DISABLE_EMAILS === "true") return;
       await resend.emails.send({
         from: "Specflow <onboarding@resend.dev>",
-        to:
-          process.env.NODE_ENV === "development"
-            ? process.env.DEV_EMAIL_TO!
-            : user.email,
+        to: user.email,
         subject: "Réinitialisation de votre mot de passe",
         html: emailResetTemplate(url),
       });
@@ -32,13 +29,10 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      if (process.env.NODE_ENV === "test") return;
+      if (process.env.DISABLE_EMAILS === "true") return;
       await resend.emails.send({
         from: "Specflow <onboarding@resend.dev>",
-        to:
-          process.env.NODE_ENV === "development"
-            ? process.env.DEV_EMAIL_TO!
-            : user.email,
+        to: user.email,
         subject: "Vérifiez votre adresse email",
         html: emailVerificationTemplate(url),
       });
@@ -79,16 +73,13 @@ export const auth = betterAuth({
     }),
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-      if (process.env.NODE_ENV === "test") return;
+      if (process.env.DISABLE_EMAILS === "true") return;
       await resend.emails.send({
-          from: "Specflow <onboarding@resend.dev>",
-          to:
-            process.env.NODE_ENV === "development"
-              ? process.env.DEV_EMAIL_TO!
-              : email,
-          subject: "Votre lien de connexion",
-          html: emailMagicLinkTemplate(url),
-        });
+        from: "Specflow <onboarding@resend.dev>",
+        to: email,
+        subject: "Votre lien de connexion",
+        html: emailMagicLinkTemplate(url),
+      });
       },
     }),
   ],

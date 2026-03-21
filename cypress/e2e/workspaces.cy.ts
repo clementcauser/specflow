@@ -108,8 +108,9 @@ describe("Gestion des workspaces", () => {
       cy.contains("MVP en cours").click();
       cy.contains("Créer et aller aux epics").click();
 
-      cy.url().should("include", "/workspaces");
-      cy.contains(name).should("be.visible");
+      // Redirigé vers la création d'epic (flux PRODUCT)
+      cy.url().should("include", "/epics/new");
+      cy.contains("Nouvelle epic").should("be.visible");
     });
 
     it("crée un workspace FREELANCE", () => {

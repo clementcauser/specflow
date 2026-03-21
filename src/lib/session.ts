@@ -24,7 +24,7 @@ export async function getSessionWithWorkspace() {
       memberships: {
         include: {
           workspace: {
-            select: { id: true, name: true, slug: true, plan: true },
+            select: { id: true, name: true, slug: true, plan: true, type: true },
           },
         },
         orderBy: { createdAt: "asc" },

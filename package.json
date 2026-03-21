@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:test": "DISABLE_EMAILS=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cypress:open": "start-server-and-test dev http://localhost:3000 cy:open",
-    "cypress:run": "start-server-and-test dev http://localhost:3000 cy:run",
+    "cypress:open": "start-server-and-test dev:test http://localhost:3000 cy:open",
+    "cypress:run": "start-server-and-test dev:test http://localhost:3000 cy:run",
     "cy:open": "cypress open --browser chrome",
     "cy:run": "cypress run --browser chrome"
   },

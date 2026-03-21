@@ -97,6 +97,12 @@ export async function createWorkspace(_data: z.infer<typeof workspaceSchema>) {
     },
   });
 
+  // Activer automatiquement le nouveau workspace
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { activeWorkspaceId: workspace.id },
+  });
+
   revalidatePath("/workspaces");
   return workspace;
 }

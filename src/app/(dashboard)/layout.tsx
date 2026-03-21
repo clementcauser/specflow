@@ -40,7 +40,7 @@ export default async function DashboardLayout({
       </div>
 
       {/* Bottom nav mobile */}
-      <BottomNav />
+      <BottomNav workspaceType={activeWorkspace.type} />
     </div>
   );
 }

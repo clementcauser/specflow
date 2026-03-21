@@ -92,7 +92,7 @@ export async function inviteMember(
 
   revalidatePath("/settings/workspaces");
 
-  if (process.env.NODE_ENV !== "production") return;
+  if (process.env.DISABLE_EMAILS === "true") return;
 
   const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite?token=${invitation.id}`;
 

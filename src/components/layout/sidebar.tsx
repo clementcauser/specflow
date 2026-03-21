@@ -24,16 +24,17 @@ import {
   ChevronDown,
   Check,
   Plus,
+  Layers,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/specs", label: "Mes specs", icon: FileText },
   { href: "/workspaces", label: "Mes espaces", icon: Users },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];
 
-type Workspace = { id: string; name: string; slug: string; plan: string };
+type Workspace = { id: string; name: string; slug: string; plan: string; type: string };
 
 type Props = {
   user: { name: string; email: string; image?: string | null };
@@ -114,7 +115,13 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {[
+          ...BASE_NAV_ITEMS.slice(0, 1),
+          ...(activeWorkspace.type === "PRODUCT"
+            ? [{ href: "/epics", label: "Epics", icon: Layers }]
+            : []),
+          ...BASE_NAV_ITEMS.slice(1),
+        ].map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
