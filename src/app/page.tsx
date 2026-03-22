@@ -108,11 +108,60 @@ highlight: false,
 },
 ];
 
+// ─── JSON-LD ───────────────────────────────────────────────────────────────────
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "SpecFlow",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  url: "https://specflow.app",
+  description:
+    "Générez des spécifications fonctionnelles complètes — user stories MoSCoW, critères Gherkin, personas — en 30 secondes grâce à l'IA.",
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Free",
+      price: "0",
+      priceCurrency: "EUR",
+      description: "3 specs à vie, export PDF, 1 workspace",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro",
+      price: "29",
+      priceCurrency: "EUR",
+      description: "30 specs/mois, export Notion + Jira, jusqu'à 5 membres",
+    },
+    {
+      "@type": "Offer",
+      name: "Max",
+      price: "79",
+      priceCurrency: "EUR",
+      description: "Specs illimitées, membres illimités, templates personnalisés",
+    },
+  ],
+  featureList: [
+    "User stories MoSCoW",
+    "Critères d'acceptance Gherkin",
+    "Personas automatiques",
+    "Résumé exécutif",
+    "Export PDF, Notion, Jira",
+    "Génération en 30 secondes",
+  ],
+  inLanguage: "fr",
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
 return (
 <div className="min-h-screen bg-background text-foreground">
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+  />
 
 ```
   {/* ── NAV ─────────────────────────────────────────────────────────────── */}
@@ -166,9 +215,8 @@ return (
       {/* Headline */}
       <h1
         className="font-serif text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight text-foreground mb-6"
-        style={{ fontFamily: "Merriweather, serif" }}
       >
-        Vos specs en{" "}
+        Générez vos specs fonctionnelles en{" "}
         <span className="text-primary italic">30 minutes.</span>
         <br />
         Pas 3 jours.
@@ -189,7 +237,7 @@ return (
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-md"
         >
           Essayer gratuitement
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Link>
@@ -272,7 +320,6 @@ return (
       </p>
       <h2
         className="font-serif text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground mb-16"
-        style={{ fontFamily: "Merriweather, serif" }}
       >
         Rédiger une spec,<br />
         c'est <span className="text-muted-foreground italic">long, ingrat</span><br />
@@ -302,7 +349,6 @@ return (
       </p>
       <h2
         className="font-serif text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground mb-16"
-        style={{ fontFamily: "Merriweather, serif" }}
       >
         De brief à spec<br />en trois étapes.
       </h2>
@@ -334,7 +380,6 @@ return (
       <div className="flex flex-wrap items-end justify-between gap-6 mb-16">
         <h2
           className="font-serif text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground"
-          style={{ fontFamily: "Merriweather, serif" }}
         >
           Une spec complète,<br />pas un brouillon.
         </h2>
@@ -423,7 +468,6 @@ return (
         </p>
         <h2
           className="font-serif text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground mb-4"
-          style={{ fontFamily: "Merriweather, serif" }}
         >
           Simple. Transparent.<br />Pas de surprise.
         </h2>
@@ -457,7 +501,6 @@ return (
                 <span className="font-mono text-lg text-muted-foreground mt-2">€</span>
                 <span
                   className="font-serif text-5xl font-bold text-foreground"
-                  style={{ fontFamily: "Merriweather, serif" }}
                 >
                   {plan.price}
                 </span>
@@ -503,7 +546,6 @@ return (
     <div className="mx-auto max-w-2xl text-center">
       <h2
         className="font-serif text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground mb-6"
-        style={{ fontFamily: "Merriweather, serif" }}
       >
         Votre prochaine spec<br />
         en <span className="text-primary italic">30 minutes.</span>
@@ -516,7 +558,7 @@ return (
         className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-md"
       >
         Essayer gratuitement — sans CB
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </Link>
