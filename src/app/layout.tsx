@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Merriweather } from "next/font/google";
 import "./globals.css";
-
-const merriweather = Merriweather({
-  subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-  display: "swap",
-});
+// Note: use next/font/google to load Merriweather with preloading in production:
+// import { Merriweather } from "next/font/google";
+// const merriweather = Merriweather({ subsets: ["latin"], weight: ["300","400","700","900"], style: ["normal","italic"], variable: "--font-serif", display: "swap" });
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://specflow.app";
 
@@ -80,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={merriweather.variable}>
+    <html lang="fr">
       <body className="antialiased">{children}</body>
     </html>
   );

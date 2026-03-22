@@ -1,0 +1,126 @@
+---
+title: "Comment rédiger une spécification fonctionnelle complète en 2026"
+description: "Guide pratique pour écrire une spec fonctionnelle claire, structurée et actionnable. User stories, critères d'acceptance, personas : tout ce que vous devez inclure."
+publishedAt: "2026-03-10"
+category: "Guide"
+---
+
+Rédiger une spécification fonctionnelle est souvent la tâche la plus redoutée des chefs de projet et product managers. Pourtant, une spec bien structurée est ce qui sépare un projet livré dans les délais d'un projet qui dérive pendant des mois.
+
+## Pourquoi la plupart des specs échouent
+
+La majorité des spécifications fonctionnelles souffrent des mêmes problèmes :
+
+- **Elles sont trop vagues.** "L'utilisateur peut gérer son profil" n'est pas une spec, c'est une intention.
+- **Elles oublient les cas limites.** On documente le happy path et on découvre les edge cases en production.
+- **Elles n'ont pas de format standard.** Chaque PM rédige à sa façon, les devs ne savent jamais où chercher l'information.
+
+Une bonne spec répond à une question simple : *est-ce qu'un développeur qui lit ce document peut implémenter la feature sans revenir me poser des questions ?*
+
+## Les 6 sections indispensables
+
+### 1. Le résumé exécutif
+
+3 à 5 phrases qui posent le contexte : qui est concerné, quel problème on résout, quel est l'objectif business. C'est la section que lit le CTO en 30 secondes pour décider si le projet est aligné avec la stratégie.
+
+### 2. Les personas
+
+Qui sont les utilisateurs réels du produit ? Pas des archétypes marketing, mais des profils concrets avec leurs besoins, leurs frustrations et leur niveau de maturité technique.
+
+Un persona utile ressemble à :
+
+> **Sophie, Chef de projet web, 34 ans**
+> Gère 3 à 5 projets simultanément. Passe 2h par semaine en réunions de cadrage. Frustration principale : les devs lui disent que la spec est "pas assez précise" sans lui expliquer ce qui manque.
+
+### 3. Les user stories MoSCoW
+
+C'est le cœur de la spec. Chaque fonctionnalité est décrite du point de vue de l'utilisateur, avec une priorisation claire :
+
+- **MUST** : non négociable pour la v1
+- **SHOULD** : important mais pas bloquant
+- **COULD** : nice-to-have si le budget le permet
+- **WON'T** : explicitement hors scope
+
+Format standard : *En tant que [persona], je peux [action] afin de [bénéfice].*
+
+### 4. Les critères d'acceptance en Gherkin
+
+C'est la section que les devs et les QA attendent. Pour chaque user story MUST et SHOULD, vous devez définir les conditions précises qui valident que la feature est implémentée correctement.
+
+Le format Gherkin (Given / When / Then) est devenu le standard de l'industrie :
+
+```gherkin
+Feature: Authentification par email
+
+Scenario: Connexion réussie
+  Given je suis sur la page de connexion
+  When je saisis un email et mot de passe valides
+  Then je suis redirigé vers mon dashboard
+  And je vois le message "Bienvenue, [prénom]"
+
+Scenario: Mot de passe incorrect
+  Given je suis sur la page de connexion
+  When je saisis un mot de passe incorrect
+  Then je vois un message d'erreur
+  And je reste sur la page de connexion
+```
+
+Ces critères peuvent être utilisés directement dans les outils de test automatisés comme Cucumber.
+
+### 5. Le hors-périmètre
+
+Une liste explicite de ce qui **n'est pas** dans le scope du projet. C'est une des sections les plus importantes pour éviter les malentendus en fin de projet.
+
+Exemple : "La v1 ne gère pas la connexion sociale (Google, GitHub). Les notifications push mobile sont hors scope."
+
+### 6. Les questions de clarification
+
+Tout ce qui est encore ambigu au moment de la rédaction. Mieux vaut les lister explicitement que de les laisser sous-entendus. Pour chaque question, notez l'impact sur la spec si elle reste sans réponse.
+
+## Le temps que ça prend réellement
+
+Soyons honnêtes : une spec complète pour un projet moyen (20-30 user stories) prend entre **2 et 3 jours** si vous partez de zéro. Cela inclut :
+
+1. Les réunions de cadrage avec le client (3-4h)
+2. La rédaction du premier draft (1 journée)
+3. Les aller-retours pour validation (1 journée)
+4. La finalisation (2-3h)
+
+C'est pour ça qu'automatiser la rédaction — au moins la structure et les sections répétitives — peut faire gagner une journée entière sur chaque projet.
+
+## Le template minimaliste pour commencer
+
+Si vous voulez un point de départ, voici la structure en Markdown :
+
+```markdown
+# [Nom du projet] — Spécification fonctionnelle v1
+
+## Résumé exécutif
+[3-5 phrases de contexte]
+
+## Personas
+### [Nom du persona 1]
+- Rôle :
+- Besoin principal :
+- Frustration principale :
+
+## User stories
+### MUST
+- [ ] En tant que [persona], je peux [action] afin de [bénéfice]
+
+## Critères d'acceptance
+### [Titre de la story]
+Given [contexte]
+When [action]
+Then [résultat attendu]
+
+## Hors-périmètre
+- [Feature explicitement exclue]
+
+## Questions ouvertes
+- [Question] → Impact : [ce qui change si non répondu]
+```
+
+---
+
+La bonne nouvelle : avec les bons outils, cette structure peut être générée automatiquement depuis un brief de quelques paragraphes. Ce qui prend 2-3 jours peut se faire en 30 minutes — [essayez SpecFlow gratuitement](/register).

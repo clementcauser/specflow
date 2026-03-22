@@ -1,109 +1,112 @@
-import Link from “next/link”;
+import Link from "next/link";
+import { getAllPosts } from "@/lib/blog";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
 const PAIN_POINTS = [
 {
-stat: “2–3”,
-unit: “jours”,
-title: “Perdus par spec”,
-desc: “Entre les réunions de cadrage, les aller-retours client et la rédaction. Pour chaque projet.”,
+stat: "2–3",
+unit: "jours",
+title: "Perdus par spec",
+desc: "Entre les réunions de cadrage, les aller-retours client et la rédaction. Pour chaque projet.",
 },
 {
-stat: “∅”,
-unit: “”,
-title: “Aucun format standard”,
-desc: “Chaque chef de projet rédige à sa façon. Les devs ne savent jamais à quoi s’attendre.”,
+stat: "∅",
+unit: "",
+title: "Aucun format standard",
+desc: "Chaque chef de projet rédige à sa façon. Les devs ne savent jamais à quoi s'attendre.",
 },
 {
-stat: “⅓”,
-unit: “”,
-title: “Critères souvent absents”,
-desc: “Les critères d’acceptance sont flous ou inexistants. On découvre les ambiguïtés en dev.”,
+stat: "⅓",
+unit: "",
+title: "Critères souvent absents",
+desc: "Les critères d'acceptance sont flous ou inexistants. On découvre les ambiguïtés en dev.",
 },
 ];
 
 const STEPS = [
 {
-n: “01”,
-title: “Décris ton projet”,
-desc: “Type de projet, stack technique, description libre du besoin. Le formulaire guidé te prend 10 minutes.”,
-tag: “4 champs · pas de jargon”,
+n: "01",
+title: "Décris ton projet",
+desc: "Type de projet, stack technique, description libre du besoin. Le formulaire guidé te prend 10 minutes.",
+tag: "4 champs · pas de jargon",
 },
 {
-n: “02”,
-title: “SpecFlow génère”,
-desc: “L’IA structure et génère le document complet en 30 à 60 secondes. Chaque section est régénérable.”,
-tag: “~45s · streaming temps réel”,
+n: "02",
+title: "SpecFlow génère",
+desc: "L'IA structure et génère le document complet en 30 à 60 secondes. Chaque section est régénérable.",
+tag: "~45s · streaming temps réel",
 },
 {
-n: “03”,
-title: “Exporte et livre”,
-desc: “PDF client-ready, export Notion ou import direct dans Jira. Prêt pour le sprint planning.”,
-tag: “PDF · Notion · Jira”,
+n: "03",
+title: "Exporte et livre",
+desc: "PDF client-ready, export Notion ou import direct dans Jira. Prêt pour le sprint planning.",
+tag: "PDF · Notion · Jira",
 },
 ];
 
 const SECTIONS = [
-{ icon: “📋”, title: “Résumé exécutif”, desc: “3-4 phrases professionnelles qui posent le contexte. Parfait pour le brief client.”, tag: “toujours inclus” },
-{ icon: “👤”, title: “Personas”, desc: “Identifiés automatiquement depuis la description, avec besoins et points de friction.”, tag: “contextuel” },
-{ icon: “📝”, title: “User stories MoSCoW”, desc: “Toutes les stories priorisées MUST / SHOULD / COULD / WON’T. Prêtes pour le sprint.”, tag: “priorisé” },
-{ icon: “✅”, title: “Critères Gherkin”, desc: “Given / When / Then pour chaque story. Directement utilisables pour les tests.”, tag: “format standard” },
-{ icon: “🚫”, title: “Hors-périmètre”, desc: “Ce qui n’est explicitement pas dans le scope. Évite les malentendus en fin de projet.”, tag: “contractuel” },
-{ icon: “❓”, title: “Questions de clarification”, desc: “Les points ambigus détectés par l’IA, avec l’impact sur la spec si non répondus.”, tag: “actionnable” },
+{ icon: "📋", title: "Résumé exécutif", desc: "3-4 phrases professionnelles qui posent le contexte. Parfait pour le brief client.", tag: "toujours inclus" },
+{ icon: "👤", title: "Personas", desc: "Identifiés automatiquement depuis la description, avec besoins et points de friction.", tag: "contextuel" },
+{ icon: "📝", title: "User stories MoSCoW", desc: "Toutes les stories priorisées MUST / SHOULD / COULD / WON'T. Prêtes pour le sprint.", tag: "priorisé" },
+{ icon: "✅", title: "Critères Gherkin", desc: "Given / When / Then pour chaque story. Directement utilisables pour les tests.", tag: "format standard" },
+{ icon: "🚫", title: "Hors-périmètre", desc: "Ce qui n'est explicitement pas dans le scope. Évite les malentendus en fin de projet.", tag: "contractuel" },
+{ icon: "❓", title: "Questions de clarification", desc: "Les points ambigus détectés par l'IA, avec l'impact sur la spec si non répondus.", tag: "actionnable" },
 ];
 
 const PLANS = [
 {
-name: “Free”,
-price: “0”,
-period: “pour toujours”,
-limit: “3 specs offertes — sans CB”,
+name: "Free",
+price: "0",
+period: "pour toujours",
+limit: "3 specs offertes — sans CB",
 features: [
-{ ok: true,  text: “3 specs (à vie)” },
-{ ok: true,  text: “Toutes les sections” },
-{ ok: true,  text: “Export PDF” },
-{ ok: true,  text: “1 workspace · 1 membre” },
-{ ok: false, text: “Export Notion / Jira” },
-{ ok: false, text: “Membres d’équipe” },
+{ ok: true,  text: "3 specs (à vie)" },
+{ ok: true,  text: "Toutes les sections" },
+{ ok: true,  text: "Export PDF" },
+{ ok: true,  text: "1 workspace · 1 membre" },
+{ ok: false, text: "Export Notion / Jira" },
+{ ok: false, text: "Membres d'équipe" },
 ],
-cta: “Commencer gratuitement”,
-href: “/register”,
+cta: "Commencer gratuitement",
+href: "/register",
 highlight: false,
 },
 {
-name: “Pro”,
-price: “29”,
-period: “par mois · par workspace”,
-limit: “30 specs / mois”,
-badge: “Le plus populaire”,
+name: "Pro",
+price: "29",
+period: "par mois · par workspace",
+limit: "30 specs / mois",
+badge: "Le plus populaire",
 features: [
-{ ok: true, text: “30 specs par mois” },
-{ ok: true, text: “Toutes les sections” },
-{ ok: true, text: “Export PDF + Notion + Jira” },
-{ ok: true, text: “Jusqu’à 5 membres” },
-{ ok: true, text: “Workspaces illimités” },
-{ ok: true, text: “Support prioritaire” },
+{ ok: true, text: "30 specs par mois" },
+{ ok: true, text: "Toutes les sections" },
+{ ok: true, text: "Export PDF + Notion + Jira" },
+{ ok: true, text: "Jusqu'à 5 membres" },
+{ ok: true, text: "Workspaces illimités" },
+{ ok: true, text: "Support prioritaire" },
 ],
-cta: “Essayer 14 jours gratuits”,
-href: “/register”,
+cta: "Essayer 14 jours gratuits",
+href: "/register",
 highlight: true,
 },
 {
-name: “Max”,
-price: “79”,
-period: “par mois · par workspace”,
-limit: “Specs illimitées”,
+name: "Max",
+price: "79",
+period: "par mois · par workspace",
+limit: "Specs illimitées",
 features: [
-{ ok: true, text: “Specs illimitées” },
-{ ok: true, text: “Toutes les sections” },
-{ ok: true, text: “Export PDF + Notion + Jira” },
-{ ok: true, text: “Membres illimités” },
-{ ok: true, text: “Templates personnalisés” },
-{ ok: true, text: “Support dédié + onboarding” },
+{ ok: true, text: "Specs illimitées" },
+{ ok: true, text: "Toutes les sections" },
+{ ok: true, text: "Export PDF + Notion + Jira" },
+{ ok: true, text: "Membres illimités" },
+{ ok: true, text: "Templates personnalisés" },
+{ ok: true, text: "Support dédié + onboarding" },
 ],
-cta: “Contacter l’équipe”,
-href: “/register”,
+cta: "Contacter l'équipe",
+href: "/register",
 highlight: false,
 },
 ];
@@ -156,6 +159,8 @@ const jsonLd = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
+const latestPosts = getAllPosts().slice(0, 2);
+
 return (
 <div className="min-h-screen bg-background text-foreground">
   <script
@@ -163,7 +168,6 @@ return (
     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
   />
 
-```
   {/* ── NAV ─────────────────────────────────────────────────────────────── */}
   <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
     <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
@@ -180,6 +184,9 @@ return (
         <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Tarifs
         </a>
+        <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          Blog
+        </Link>
         <Link
           href="/login"
           className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -541,6 +548,62 @@ return (
     </div>
   </section>
 
+  {/* ── BLOG ─────────────────────────────────────────────────────────────── */}
+  {latestPosts.length > 0 && (
+    <section className="py-24 px-6 border-t border-border">
+      <div className="mx-auto max-w-5xl">
+        <div className="flex items-end justify-between gap-4 mb-12">
+          <div>
+            <p className="font-mono text-xs text-primary uppercase tracking-widest mb-4">
+              Blog
+            </p>
+            <h2 className="font-serif text-4xl font-bold leading-tight tracking-tight text-foreground">
+              Méthodes & guides
+            </h2>
+          </div>
+          <Link
+            href="/blog"
+            className="shrink-0 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Tous les articles →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {latestPosts.map((post) => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group rounded-xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                {post.category && (
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-primary bg-primary/8 border border-primary/15 px-2 py-0.5 rounded">
+                    {post.category}
+                  </span>
+                )}
+                <span className="font-mono text-xs text-muted-foreground">
+                  {format(new Date(post.publishedAt), "d MMM yyyy", { locale: fr })}
+                </span>
+              </div>
+              <h3 className="font-serif text-lg font-bold text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
+                {post.title}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                {post.description}
+              </p>
+              <div className="mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-primary">
+                Lire
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
   {/* ── CTA FINAL ───────────────────────────────────────────────────────── */}
   <section className="py-24 px-6 border-t border-border">
     <div className="mx-auto max-w-2xl text-center">
@@ -589,7 +652,6 @@ return (
   </footer>
 
 </div>
-```
 
 );
 }

@@ -1,0 +1,117 @@
+---
+title: "User stories MoSCoW : le guide complet pour prioriser votre backlog"
+description: "Apprenez à rédiger des user stories efficaces et à les prioriser avec la méthode MoSCoW. Exemples concrets, erreurs à éviter, et format Gherkin pour les critères d'acceptance."
+publishedAt: "2026-03-17"
+category: "Méthode"
+---
+
+La méthode MoSCoW est probablement la technique de priorisation la plus utilisée en gestion de projet agile. Pourtant, elle est souvent mal appliquée — avec des backlogs où tout est "MUST" et des équipes qui ne savent plus quoi livrer en priorité.
+
+Ce guide vous explique comment utiliser MoSCoW correctement, avec des exemples concrets et des erreurs à éviter.
+
+## Qu'est-ce que la méthode MoSCoW ?
+
+MoSCoW est un acronyme qui classe chaque fonctionnalité en quatre catégories :
+
+| Catégorie | Signification | Question à se poser |
+|-----------|--------------|---------------------|
+| **M**ust have | Non négociable | Sans ça, le produit ne fonctionne pas |
+| **S**hould have | Important | Douloureux à ne pas avoir, mais pas bloquant |
+| **C**ould have | Souhaitable | Nice-to-have si le budget le permet |
+| **W**on't have | Hors scope v1 | Explicitement exclu de cette version |
+
+Le "o" dans MoSCoW ne signifie rien — c'est juste là pour rendre l'acronyme prononçable.
+
+## Pourquoi MoSCoW échoue dans la pratique
+
+Le problème le plus courant : **tout devient MUST**. Les product owners ont du mal à dire non, les stakeholders font pression, et on se retrouve avec un backlog où 80% des stories sont prioritaires.
+
+Règle empirique : si plus de 60% de vos stories sont MUST, vous avez un problème de priorisation, pas de ressources.
+
+Les autres erreurs classiques :
+
+1. **Prioriser par feature, pas par valeur.** "Avoir un bouton de partage" n'est pas une user story, c'est une implémentation. La question est : quelle valeur apporte ce bouton à quel utilisateur ?
+2. **Oublier le WON'T.** La liste de ce qui est explicitement exclu est aussi importante que ce qui est inclus. Elle évite les malentendus en fin de projet.
+3. **Ne pas relier les stories aux personas.** "L'utilisateur peut filtrer les produits" — quel utilisateur ? Pour quel cas d'usage ?
+
+## Comment rédiger une bonne user story
+
+Le format standard est : **En tant que [persona], je peux [action] afin de [bénéfice].**
+
+La partie la plus souvent mal écrite est le **bénéfice**. Ce n'est pas la feature, c'est la raison pour laquelle l'utilisateur en a besoin.
+
+❌ Mauvais : *En tant qu'acheteur, je peux filtrer les produits par taille afin de filtrer les produits.*
+
+✅ Bon : *En tant qu'acheteur, je peux filtrer les produits par taille afin de ne voir que les articles disponibles dans ma taille et éviter les déceptions à l'ajout au panier.*
+
+### Exemples par catégorie pour un e-commerce
+
+**MUST — Sans ça, le site ne fonctionne pas :**
+- En tant qu'acheteur, je peux ajouter un produit à mon panier afin de préparer ma commande
+- En tant qu'acheteur, je peux payer par carte bancaire afin de finaliser mon achat
+- En tant qu'acheteur, je peux créer un compte afin de suivre mes commandes
+
+**SHOULD — Important mais pas bloquant pour la v1 :**
+- En tant qu'acheteur, je reçois un email de confirmation après ma commande afin d'avoir une preuve d'achat
+- En tant qu'acheteur, je peux sauvegarder mon adresse de livraison afin de ne pas la ressaisir à chaque commande
+
+**COULD — Nice-to-have :**
+- En tant qu'acheteur, je peux créer une wishlist afin de sauvegarder les produits qui m'intéressent
+- En tant qu'acheteur, je peux partager mon panier afin de demander l'avis de mes proches
+
+**WON'T — Explicitement hors scope v1 :**
+- Connexion sociale (Google, Facebook)
+- Recommandations personnalisées par IA
+- Application mobile native
+
+## Les critères d'acceptance : de la story au test
+
+Une user story sans critères d'acceptance est incomplète. Les critères définissent précisément quand une story est "done".
+
+Le format **Gherkin** (Given / When / Then) est le standard de l'industrie. Il a l'avantage d'être lisible par des non-développeurs tout en étant directement utilisable dans les outils de test automatisés.
+
+```gherkin
+Feature: Ajout au panier
+
+Scenario: Ajout d'un produit disponible
+  Given je suis sur la fiche d'un produit en stock
+  When je clique sur "Ajouter au panier"
+  Then le produit apparaît dans mon panier
+  And le compteur du panier s'incrémente de 1
+  And le prix total du panier est mis à jour
+
+Scenario: Tentative d'ajout d'un produit épuisé
+  Given je suis sur la fiche d'un produit épuisé
+  When j'arrive sur la page
+  Then le bouton "Ajouter au panier" est désactivé
+  And un badge "Rupture de stock" est visible
+
+Scenario: Ajout en quantité supérieure au stock
+  Given je suis sur la fiche d'un produit avec 2 articles en stock
+  When je sélectionne une quantité de 3
+  Then la quantité est automatiquement limitée à 2
+  And un message "Stock limité : 2 disponibles" est affiché
+```
+
+Notez que chaque scénario couvre un cas différent : le happy path, mais aussi les cas limites. C'est là que la plupart des specs sont incomplètes.
+
+## Le bon ratio MUST / SHOULD / COULD
+
+Une heuristique utile pour une v1 :
+
+- **MUST** : 40-50% des stories — ce qui est nécessaire pour lancer
+- **SHOULD** : 20-30% — ce qu'on vise pour la v1 si le temps le permet
+- **COULD** : 20-30% — le backlog futur
+- **WON'T** : liste explicite, pas de pourcentage
+
+Si votre sprint planning déborde systématiquement, c'est souvent parce que trop de SHOULD sont traités comme des MUST.
+
+## Automatiser la rédaction des user stories
+
+Rédiger des dizaines de user stories MoSCoW avec leurs critères Gherkin est chronophage. Pour un projet de taille moyenne, on parle facilement de 40-60 stories, soit une journée entière de travail.
+
+Des outils comme [SpecFlow](/register) permettent de générer automatiquement cette structure à partir d'un brief : personas, stories priorisées MoSCoW, et critères Gherkin pour chaque story — en moins d'une minute. Le document est ensuite éditable section par section.
+
+---
+
+La méthode MoSCoW n'est pas une fin en soi. C'est un outil de communication entre vous, votre équipe et vos stakeholders. L'objectif est que tout le monde soit aligné sur ce qui sera livré — et sur ce qui ne le sera pas.
