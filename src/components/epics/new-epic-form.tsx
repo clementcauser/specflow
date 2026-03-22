@@ -10,10 +10,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 const PRIORITIES = [
-  { value: "MUST", label: "Must have", description: "Critique pour le lancement" },
-  { value: "SHOULD", label: "Should have", description: "Important mais pas bloquant" },
-  { value: "COULD", label: "Could have", description: "Utile si le temps le permet" },
-  { value: "WONT", label: "Won't have", description: "Hors scope pour l'instant" },
+  {
+    value: "MUST",
+    label: "Must have",
+    description: "Critique pour le lancement",
+  },
+  {
+    value: "SHOULD",
+    label: "Should have",
+    description: "Important mais pas bloquant",
+  },
+  {
+    value: "COULD",
+    label: "Could have",
+    description: "Utile si le temps le permet",
+  },
+  {
+    value: "WONT",
+    label: "Won't have",
+    description: "Hors scope pour l'instant",
+  },
 ] as const;
 
 type Priority = (typeof PRIORITIES)[number]["value"];
@@ -31,7 +47,12 @@ export function NewEpicForm({ workspaceId }: { workspaceId: string }) {
     setError("");
     startTransition(async () => {
       try {
-        const epic = await createEpic({ workspaceId, title, description, priority });
+        const epic = await createEpic({
+          workspaceId,
+          title,
+          description,
+          priority,
+        });
         router.push(`/epics/${epic.id}`);
       } catch (err: unknown) {
         setError((err as Error).message);
@@ -42,7 +63,7 @@ export function NewEpicForm({ workspaceId }: { workspaceId: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-1.5">
-        <Label htmlFor="title">Titre de l'epic</Label>
+        <Label htmlFor="title">Titre de l&apos;epic</Label>
         <Input
           id="title"
           value={title}
@@ -55,7 +76,10 @@ export function NewEpicForm({ workspaceId }: { workspaceId: string }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description <span className="text-muted-foreground font-normal">(optionnel)</span></Label>
+        <Label htmlFor="description">
+          Description{" "}
+          <span className="text-muted-foreground font-normal">(optionnel)</span>
+        </Label>
         <Textarea
           id="description"
           value={description}
