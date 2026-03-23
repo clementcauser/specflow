@@ -8,25 +8,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { MoSCoW } from "@/lib/enums";
 
 const PRIORITIES = [
   {
-    value: "MUST",
+    value: MoSCoW.MUST,
     label: "Must have",
     description: "Critique pour le lancement",
   },
   {
-    value: "SHOULD",
+    value: MoSCoW.SHOULD,
     label: "Should have",
     description: "Important mais pas bloquant",
   },
   {
-    value: "COULD",
+    value: MoSCoW.COULD,
     label: "Could have",
     description: "Utile si le temps le permet",
   },
   {
-    value: "WONT",
+    value: MoSCoW.WONT,
     label: "Won't have",
     description: "Hors scope pour l'instant",
   },
@@ -40,7 +41,7 @@ export function NewEpicForm({ workspaceId }: { workspaceId: string }) {
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<Priority>("SHOULD");
+  const [priority, setPriority] = useState<Priority>(MoSCoW.SHOULD);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

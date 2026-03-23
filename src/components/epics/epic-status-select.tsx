@@ -10,12 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EpicStatus } from "@/lib/enums";
 
 const STATUS_OPTIONS = [
-  { value: "OPEN", label: "Ouverte" },
-  { value: "IN_PROGRESS", label: "En cours" },
-  { value: "DONE", label: "Terminée" },
-  { value: "ARCHIVED", label: "Archivée" },
+  { value: EpicStatus.OPEN, label: "Ouverte" },
+  { value: EpicStatus.IN_PROGRESS, label: "En cours" },
+  { value: EpicStatus.DONE, label: "Terminée" },
+  { value: EpicStatus.ARCHIVED, label: "Archivée" },
 ] as const;
 
 type EpicStatus = (typeof STATUS_OPTIONS)[number]["value"];

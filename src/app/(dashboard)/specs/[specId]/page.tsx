@@ -6,6 +6,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getSpec } from "@/actions/specs";
+import { SpecStatus } from "@/lib/enums";
 
 export default async function SpecPage({
   params,
@@ -36,8 +37,8 @@ export default async function SpecPage({
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-2xl font-semibold">{spec.title}</h1>
-          <Badge variant={spec.status === "DONE" ? "default" : "secondary"}>
-            {spec.status === "DONE" ? "Générée" : spec.status}
+          <Badge variant={spec.status === SpecStatus.DONE ? "default" : "secondary"}>
+            {spec.status === SpecStatus.DONE ? "Générée" : spec.status}
           </Badge>
         </div>
         {spec.prompt && (

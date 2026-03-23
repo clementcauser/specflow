@@ -7,7 +7,8 @@ import { SpecList } from "@/components/specs/spec-list";
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { WORKSPACE_PRODUCT_TYPE_LABELS } from "@/types/workspaces";
-import type { WorkspaceProductType } from "@prisma/client";
+import type { WorkspaceProductType } from "@/lib/enums";
+import { WorkspaceType } from "@/lib/enums";
 
 export default async function ProjectDetailPage({
   params,
@@ -17,7 +18,7 @@ export default async function ProjectDetailPage({
   const { projectId } = await params;
   const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "FREELANCE") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.FREELANCE) redirect("/dashboard");
 
   let project;
   try {

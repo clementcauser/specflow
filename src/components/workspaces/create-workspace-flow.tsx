@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type {
+import {
   WorkspaceType,
   WorkspaceTeamSize,
   WorkspaceProductStage,
   WorkspaceProductType,
-} from "@prisma/client";
+  WorkspacePlan,
+} from "@/lib/enums";
 import { createWorkspace } from "@/actions/workspaces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +52,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 
 const WORKSPACE_TYPES: { type: WorkspaceType; emoji: string; label: string; tagline: string; bullets: string[] }[] = [
   {
-    type: "AGENCY",
+    type: WorkspaceType.AGENCY,
     emoji: "🏢",
     label: "Agence",
     tagline: "Je crée des specs pour des projets clients distincts",
@@ -62,7 +63,7 @@ const WORKSPACE_TYPES: { type: WorkspaceType; emoji: string; label: string; tagl
     ],
   },
   {
-    type: "PRODUCT",
+    type: WorkspaceType.PRODUCT,
     emoji: "🚀",
     label: "Produit",
     tagline: "Je travaille sur un produit en évolution continue",
@@ -73,7 +74,7 @@ const WORKSPACE_TYPES: { type: WorkspaceType; emoji: string; label: string; tagl
     ],
   },
   {
-    type: "FREELANCE",
+    type: WorkspaceType.FREELANCE,
     emoji: "⚡",
     label: "Freelance",
     tagline: "Je gère plusieurs clients en parallèle",
@@ -141,7 +142,7 @@ function StepType({
 
 // ─── Step 2 — Workspace info ──────────────────────────────────────────────
 
-const TEAM_SIZES: WorkspaceTeamSize[] = ["SOLO", "SMALL", "MEDIUM", "LARGE"];
+const TEAM_SIZES: WorkspaceTeamSize[] = [WorkspaceTeamSize.SOLO, WorkspaceTeamSize.SMALL, WorkspaceTeamSize.MEDIUM, WorkspaceTeamSize.LARGE];
 
 function StepInfo({
   type,
@@ -161,16 +162,16 @@ function StepInfo({
   onTeamSizeChange: (v: WorkspaceTeamSize) => void;
 }) {
   const nameLabel =
-    type === "AGENCY"
+    type === WorkspaceType.AGENCY
       ? "Nom de l'agence"
-      : type === "PRODUCT"
+      : type === WorkspaceType.PRODUCT
         ? "Nom du produit"
         : "Ton nom ou marque";
 
   const namePlaceholder =
-    type === "AGENCY"
+    type === WorkspaceType.AGENCY
       ? "Agence Dupont"
-      : type === "PRODUCT"
+      : type === WorkspaceType.PRODUCT
         ? "MonSaaS"
         : "Thomas Roux Dev";
 
@@ -209,7 +210,7 @@ function StepInfo({
           </p>
         </div>
 
-        {type === "AGENCY" && (
+        {type === WorkspaceType.AGENCY && (
           <div className="space-y-2">
             <Label>Taille de l&apos;équipe</Label>
             <div className="flex gap-2 flex-wrap">
@@ -241,8 +242,8 @@ function StepInfo({
 
 // ─── Step 3 — Business context ────────────────────────────────────────────
 
-const SPECIALTIES: WorkspaceProductType[] = ["ECOMMERCE", "SAAS", "MARKETPLACE", "LANDING_PAGE", "MOBILE", "DESKTOP", "API", "IOT", "AI", "OTHER"];
-const PRODUCT_STAGES: WorkspaceProductStage[] = ["PRE_MVP", "MVP", "LIVE", "MATURE"];
+const SPECIALTIES: WorkspaceProductType[] = [WorkspaceProductType.ECOMMERCE, WorkspaceProductType.SAAS, WorkspaceProductType.MARKETPLACE, WorkspaceProductType.LANDING_PAGE, WorkspaceProductType.MOBILE, WorkspaceProductType.DESKTOP, WorkspaceProductType.API, WorkspaceProductType.IOT, WorkspaceProductType.AI, WorkspaceProductType.OTHER];
+const PRODUCT_STAGES: WorkspaceProductStage[] = [WorkspaceProductStage.PRE_MVP, WorkspaceProductStage.MVP, WorkspaceProductStage.LIVE, WorkspaceProductStage.MATURE];
 
 function StepContext({
   type,
@@ -277,7 +278,7 @@ function StepContext({
     );
   }
 
-  if (type === "AGENCY") {
+  if (type === WorkspaceType.AGENCY) {
     return (
       <div className="space-y-6">
         <div>
@@ -310,7 +311,7 @@ function StepContext({
     );
   }
 
-  if (type === "PRODUCT") {
+  if (type === WorkspaceType.PRODUCT) {
     return (
       <div className="space-y-6">
         <div>
@@ -451,7 +452,7 @@ export function CreateWorkspaceFlow() {
           name,
           slug,
           type,
-          plan: "FREE",
+          plan: WorkspacePlan.FREE,
           teamSize: teamSize ?? undefined,
           specialties,
           tagline: tagline || undefined,
@@ -460,9 +461,9 @@ export function CreateWorkspaceFlow() {
           productStage: productStage ?? undefined,
         });
         router.push(
-          type === "PRODUCT"
+          type === WorkspaceType.PRODUCT
             ? `/epics/new`
-            : type === "FREELANCE"
+            : type === WorkspaceType.FREELANCE
               ? `/clients/new`
               : `/workspaces`,
         );
@@ -475,9 +476,9 @@ export function CreateWorkspaceFlow() {
   }
 
   const submitLabel =
-    type === "AGENCY"
+    type === WorkspaceType.AGENCY
       ? "Créer et aller aux projets"
-      : type === "PRODUCT"
+      : type === WorkspaceType.PRODUCT
         ? "Créer et aller aux epics"
         : "Créer et ajouter un client";
 

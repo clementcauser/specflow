@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getSessionWithWorkspace } from "@/lib/session";
 import { getSpecs, getWorkspacePlanInfo } from "@/actions/specs";
 import { SpecList } from "@/components/specs/spec-list";
+import { WorkspacePlan } from "@/lib/enums";
 
 export default async function SpecsPage() {
   const { user } = await getSessionWithWorkspace();
@@ -16,7 +17,7 @@ export default async function SpecsPage() {
     getWorkspacePlanInfo(activeWorkspaceId),
   ]);
 
-  const isFreePlan = planInfo.plan === "FREE" && planInfo.limit !== null;
+  const isFreePlan = planInfo.plan === WorkspacePlan.FREE && planInfo.limit !== null;
   const isAtLimit = planInfo.isAtLimit;
 
   return (

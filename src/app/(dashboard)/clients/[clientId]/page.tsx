@@ -8,7 +8,8 @@ import { ArrowLeft, Plus, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { WORKSPACE_PRODUCT_TYPE_LABELS } from "@/types/workspaces";
-import type { WorkspaceProductType } from "@prisma/client";
+import type { WorkspaceProductType } from "@/lib/enums";
+import { WorkspaceType } from "@/lib/enums";
 
 export default async function ClientDetailPage({
   params,
@@ -18,7 +19,7 @@ export default async function ClientDetailPage({
   const { clientId } = await params;
   const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "FREELANCE") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.FREELANCE) redirect("/dashboard");
 
   let client;
   try {

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
+import { SpecStatus, WorkspacePlan } from "@/lib/enums";
 
 const FREE_PLAN_LIMIT = 3;
 
@@ -31,7 +32,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   });
   if (!member) throw new Error("Accès refusé");
 
-  if (member.workspace.plan === "FREE") {
+  if (member.workspace.plan === WorkspacePlan.FREE) {
     // Vérification et création dans une transaction pour éviter la race condition
     const spec = await prisma.$transaction(async (tx) => {
       const count = await tx.spec.count({
@@ -50,7 +51,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
           projectId: parsed.projectId,
           epicId: parsed.epicId,
           creatorId: session.user.id,
-          status: "DRAFT",
+          status: SpecStatus.DRAFT,
           content: { _sections: parsed.sections },
         },
       });
@@ -67,7 +68,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
       projectId: parsed.projectId,
       epicId: parsed.epicId,
       creatorId: session.user.id,
-      status: "DRAFT",
+      status: SpecStatus.DRAFT,
       content: { _sections: parsed.sections },
     },
   });
@@ -132,7 +133,7 @@ export async function getSpec(specId: string) {
 export async function updateSpecContent(
   specId: string,
   content: Record<string, string>,
-  status: "DONE" | "ERROR",
+  status: typeof SpecStatus.DONE | typeof SpecStatus.ERROR,
 ) {
   const session = await requireSession();
 
@@ -199,7 +200,7 @@ export async function getWorkspacePlanInfo(workspaceId: string) {
 
   const plan = member.workspace.plan;
 
-  if (plan !== "FREE") {
+  if (plan !== WorkspacePlan.FREE) {
     return { plan, specsCount: 0, limit: null, isAtLimit: false };
   }
 

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { randomUUID } from "crypto";
+import { MoSCoW, EpicStatus } from "@/lib/enums";
 
 async function assertMember(userId: string, workspaceId: string) {
   const member = await prisma.member.findUnique({
@@ -20,7 +21,7 @@ const createEpicSchema = z.object({
   workspaceId: z.string(),
   title: z.string().min(2).max(100),
   description: z.string().optional(),
-  priority: z.enum(["MUST", "SHOULD", "COULD", "WONT"] as const).default("SHOULD"),
+  priority: z.enum([MoSCoW.MUST, MoSCoW.SHOULD, MoSCoW.COULD, MoSCoW.WONT]).default(MoSCoW.SHOULD),
 });
 
 export async function createEpic(data: z.infer<typeof createEpicSchema>) {
@@ -36,7 +37,7 @@ export async function createEpic(data: z.infer<typeof createEpicSchema>) {
       title: parsed.title,
       description: parsed.description,
       priority: parsed.priority,
-      status: "OPEN",
+      status: EpicStatus.OPEN,
       createdAt: now,
       updatedAt: now,
     },
@@ -102,8 +103,8 @@ const updateEpicSchema = z.object({
   epicId: z.string(),
   title: z.string().min(2).max(100).optional(),
   description: z.string().optional(),
-  priority: z.enum(["MUST", "SHOULD", "COULD", "WONT"] as const).optional(),
-  status: z.enum(["OPEN", "IN_PROGRESS", "DONE", "ARCHIVED"] as const).optional(),
+  priority: z.enum([MoSCoW.MUST, MoSCoW.SHOULD, MoSCoW.COULD, MoSCoW.WONT]).optional(),
+  status: z.enum([EpicStatus.OPEN, EpicStatus.IN_PROGRESS, EpicStatus.DONE, EpicStatus.ARCHIVED]).optional(),
 });
 
 export async function updateEpic(data: z.infer<typeof updateEpicSchema>) {

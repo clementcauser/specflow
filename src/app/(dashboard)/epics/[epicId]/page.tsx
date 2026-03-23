@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType, MoSCoW } from "@/lib/enums";
 import { getEpic } from "@/actions/epics";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,17 +10,17 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 
 const PRIORITY_LABELS: Record<string, string> = {
-  MUST: "Must have",
-  SHOULD: "Should have",
-  COULD: "Could have",
-  WONT: "Won't have",
+  [MoSCoW.MUST]: "Must have",
+  [MoSCoW.SHOULD]: "Should have",
+  [MoSCoW.COULD]: "Could have",
+  [MoSCoW.WONT]: "Won't have",
 };
 
 const PRIORITY_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
-  MUST: "default",
-  SHOULD: "secondary",
-  COULD: "outline",
-  WONT: "outline",
+  [MoSCoW.MUST]: "default",
+  [MoSCoW.SHOULD]: "secondary",
+  [MoSCoW.COULD]: "outline",
+  [MoSCoW.WONT]: "outline",
 };
 
 export default async function EpicDetailPage({
@@ -31,7 +32,7 @@ export default async function EpicDetailPage({
   const workspace = await getActiveWorkspace();
 
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "PRODUCT") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.PRODUCT) redirect("/dashboard");
 
   let epic;
   try {

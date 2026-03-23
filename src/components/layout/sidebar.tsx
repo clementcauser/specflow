@@ -28,6 +28,7 @@ import {
   Briefcase,
   Zap,
 } from "lucide-react";
+import { WorkspaceType, WorkspacePlan } from "@/lib/enums";
 
 const BASE_NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -127,9 +128,9 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
       <nav className="flex-1 px-3 py-3 space-y-0.5">
         {[
           ...BASE_NAV_ITEMS.slice(0, 1),
-          ...(activeWorkspace.type === "PRODUCT"
+          ...(activeWorkspace.type === WorkspaceType.PRODUCT
             ? [{ href: "/epics", label: "Epics", icon: Layers }]
-            : activeWorkspace.type === "FREELANCE"
+            : activeWorkspace.type === WorkspaceType.FREELANCE
               ? [{ href: "/clients", label: "Clients", icon: Briefcase }]
               : []),
           ...BASE_NAV_ITEMS.slice(1),
@@ -154,7 +155,7 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
       </nav>
 
       {/* Upgrade CTA for Free plan */}
-      {activeWorkspace.plan === "FREE" && (
+      {activeWorkspace.plan === WorkspacePlan.FREE && (
         <div className="px-3 pb-2">
           <Link
             href="/plans"

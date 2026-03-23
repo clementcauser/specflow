@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { getActiveWorkspace } from "@/actions/tenant";
 import { getWorkspacePlanInfo } from "@/actions/specs";
 import { redirect } from "next/navigation";
+import { WorkspacePlan } from "@/lib/enums";
 
 const PLANS = [
   {
-    id: "FREE" as const,
+    id: WorkspacePlan.FREE,
     name: "Free",
     price: "0",
     period: "pour toujours",
@@ -25,7 +26,7 @@ const PLANS = [
     highlight: false,
   },
   {
-    id: "PRO" as const,
+    id: WorkspacePlan.PRO,
     name: "Pro",
     price: "29",
     period: "par mois · par workspace",
@@ -79,7 +80,7 @@ export default async function PlansPage() {
         </p>
       </div>
 
-      {planInfo.plan === "FREE" && planInfo.limit !== null && (
+      {planInfo.plan === WorkspacePlan.FREE && planInfo.limit !== null && (
         <div
           className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm"
           role="status"

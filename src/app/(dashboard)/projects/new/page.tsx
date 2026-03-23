@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType } from "@/lib/enums";
 import { getClient } from "@/actions/clients";
 import { NewProjectForm } from "@/components/projects/new-project-form";
 
@@ -11,7 +12,7 @@ export default async function NewProjectPage({
   const { clientId } = await searchParams;
   const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "FREELANCE") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.FREELANCE) redirect("/dashboard");
 
   if (!clientId) redirect("/clients");
 

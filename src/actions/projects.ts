@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { randomUUID } from "crypto";
+import { WorkspaceProductType } from "@/lib/enums";
 
 async function assertMember(userId: string, workspaceId: string) {
   const member = await prisma.member.findUnique({
@@ -21,7 +22,7 @@ const createProjectSchema = z.object({
   clientId: z.string().optional(),
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  productType: z.enum(["ECOMMERCE", "SAAS", "MARKETPLACE", "LANDING_PAGE", "MOBILE", "DESKTOP", "API", "IOT", "AI", "OTHER"] as const),
+  productType: z.enum([WorkspaceProductType.ECOMMERCE, WorkspaceProductType.SAAS, WorkspaceProductType.MARKETPLACE, WorkspaceProductType.LANDING_PAGE, WorkspaceProductType.MOBILE, WorkspaceProductType.DESKTOP, WorkspaceProductType.API, WorkspaceProductType.IOT, WorkspaceProductType.AI, WorkspaceProductType.OTHER]),
   stack: z.string().max(200).optional(),
   clientName: z.string().max(100).optional(),
 });
@@ -90,7 +91,7 @@ const updateProjectSchema = z.object({
   projectId: z.string(),
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-  productType: z.nativeEnum(WorkspaceProductType).optional(),
+  productType: z.enum([WorkspaceProductType.ECOMMERCE, WorkspaceProductType.SAAS, WorkspaceProductType.MARKETPLACE, WorkspaceProductType.LANDING_PAGE, WorkspaceProductType.MOBILE, WorkspaceProductType.DESKTOP, WorkspaceProductType.API, WorkspaceProductType.IOT, WorkspaceProductType.AI, WorkspaceProductType.OTHER]).optional(),
   stack: z.string().max(200).optional(),
 });
 

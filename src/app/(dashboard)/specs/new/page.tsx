@@ -7,6 +7,7 @@ import { NewSpecForm } from "@/components/specs/new-spec-form";
 import { NewEpicSpecForm } from "@/components/specs/new-epic-spec-form";
 import { NewProjectSpecForm } from "@/components/specs/new-project-spec-form";
 import { PlanLimitBanner } from "@/components/plans/plan-limit-banner";
+import { WorkspacePlan } from "@/lib/enums";
 
 export default async function NewSpecPage({
   searchParams,
@@ -36,7 +37,7 @@ export default async function NewSpecPage({
             Décrivez ce que vous souhaitez spécifier pour cette epic.
           </p>
         </div>
-        {planInfo.plan === "FREE" && planInfo.limit !== null && (
+        {planInfo.plan === WorkspacePlan.FREE && planInfo.limit !== null && (
           <PlanLimitBanner
             specsCount={planInfo.specsCount}
             limit={planInfo.limit}
@@ -69,7 +70,7 @@ export default async function NewSpecPage({
             Décrivez ce que vous souhaitez spécifier pour ce projet.
           </p>
         </div>
-        {planInfo.plan === "FREE" && planInfo.limit !== null && (
+        {planInfo.plan === WorkspacePlan.FREE && planInfo.limit !== null && (
           <PlanLimitBanner
             specsCount={planInfo.specsCount}
             limit={planInfo.limit}
@@ -96,7 +97,7 @@ export default async function NewSpecPage({
           Décrivez votre projet et obtenez une spec complète en quelques secondes.
         </p>
       </div>
-      {planInfo.plan === "FREE" && planInfo.limit !== null && (
+      {planInfo.plan === WorkspacePlan.FREE && planInfo.limit !== null && (
         <PlanLimitBanner
           specsCount={planInfo.specsCount}
           limit={planInfo.limit}

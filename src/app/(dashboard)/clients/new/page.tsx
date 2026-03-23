@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType } from "@/lib/enums";
 import { NewClientForm } from "@/components/clients/new-client-form";
 
 export default async function NewClientPage() {
   const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "FREELANCE") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.FREELANCE) redirect("/dashboard");
 
   return (
     <div className="max-w-xl mx-auto space-y-6">

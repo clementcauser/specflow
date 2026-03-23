@@ -7,6 +7,7 @@ import { WorkspaceSettingsForm } from "@/components/workspaces/workspace-setting
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
+import { WorkspaceRole } from "@/lib/enums";
 
 export default async function WorkspaceDetailPage({
   params,
@@ -22,10 +23,10 @@ export default async function WorkspaceDetailPage({
   const currentMember = workspace.members.find(
     (m) => m.userId === session.user.id,
   )!;
-  const isOwner = currentMember.role === "OWNER";
+  const isOwner = currentMember.role === WorkspaceRole.OWNER;
   const canManage =
-    currentMember.role === "OWNER" ||
-    currentMember.role === "ADMIN";
+    currentMember.role === WorkspaceRole.OWNER ||
+    currentMember.role === WorkspaceRole.ADMIN;
 
   return (
     <div className="space-y-6">

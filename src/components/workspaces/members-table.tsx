@@ -28,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { canManageRole, ROLE_LABELS } from "@/types/workspaces";
 import type { Role } from "@/types/workspaces";
+import { WorkspaceRole } from "@/lib/enums";
 
 type Member = {
   id: string;
@@ -89,7 +90,7 @@ export function MembersTable({
     });
   }
 
-  const canManage = ["OWNER", "ADMIN"].includes(currentRole);
+  const canManage = [WorkspaceRole.OWNER, WorkspaceRole.ADMIN].includes(currentRole);
 
   return (
     <div className="space-y-6">
@@ -144,8 +145,8 @@ export function MembersTable({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ADMIN">Administrateur</SelectItem>
-                        <SelectItem value="MEMBER">Membre</SelectItem>
+                        <SelectItem value={WorkspaceRole.ADMIN}>Administrateur</SelectItem>
+                        <SelectItem value={WorkspaceRole.MEMBER}>Membre</SelectItem>
                       </SelectContent>
                     </Select>
                   ) : (
@@ -153,7 +154,7 @@ export function MembersTable({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {isSelf && currentRole !== "OWNER" && (
+                  {isSelf && currentRole !== WorkspaceRole.OWNER && (
                     <Button
                       size="sm"
                       variant="ghost"

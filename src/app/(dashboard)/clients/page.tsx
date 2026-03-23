@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType } from "@/lib/enums";
 import { getClients } from "@/actions/clients";
 import { ClientList } from "@/components/clients/client-list";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Plus } from "lucide-react";
 export default async function ClientsPage() {
   const workspace = await getActiveWorkspace();
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "FREELANCE") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.FREELANCE) redirect("/dashboard");
 
   const clients = await getClients(workspace.id);
 

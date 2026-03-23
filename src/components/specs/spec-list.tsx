@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { SpecStatus } from "@/lib/enums";
 import { FileText, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -110,7 +111,7 @@ export function SpecList({ specs }: SpecListProps) {
 
 function StatusBadge({ status }: { status: string }) {
   switch (status.toUpperCase()) {
-    case "DONE":
+    case SpecStatus.DONE:
       return (
         <Badge
           variant="secondary"
@@ -119,7 +120,7 @@ function StatusBadge({ status }: { status: string }) {
           Terminé
         </Badge>
       );
-    case "GENERATING":
+    case SpecStatus.GENERATING:
       return (
         <Badge
           variant="secondary"
@@ -128,7 +129,7 @@ function StatusBadge({ status }: { status: string }) {
           Génération...
         </Badge>
       );
-    case "ERROR":
+    case SpecStatus.ERROR:
       return <Badge variant="destructive">Erreur</Badge>;
     default:
       return (

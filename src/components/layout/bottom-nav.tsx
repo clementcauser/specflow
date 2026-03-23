@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileText, Users, Settings, Layers, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WorkspaceType } from "@/lib/enums";
 
 const BASE_NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -17,9 +18,9 @@ export function BottomNav({ workspaceType }: { workspaceType?: string }) {
 
   const items = [
     BASE_NAV_ITEMS[0],
-    ...(workspaceType === "PRODUCT"
+    ...(workspaceType === WorkspaceType.PRODUCT
       ? [{ href: "/epics", label: "Epics", icon: Layers }]
-      : workspaceType === "FREELANCE"
+      : workspaceType === WorkspaceType.FREELANCE
         ? [{ href: "/clients", label: "Clients", icon: Briefcase }]
         : []),
     ...BASE_NAV_ITEMS.slice(1),

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType } from "@/lib/enums";
 import { getEpics } from "@/actions/epics";
 import { EpicList } from "@/components/epics/epic-list";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ export default async function EpicsPage() {
   const workspace = await getActiveWorkspace();
 
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "PRODUCT") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.PRODUCT) redirect("/dashboard");
 
   const epics = await getEpics(workspace.id);
 

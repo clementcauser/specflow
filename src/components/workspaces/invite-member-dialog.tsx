@@ -20,12 +20,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { WorkspaceRole } from "@/lib/enums";
 
 export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
-    const [role, setRole] = useState("MEMBER");
+    const [role, setRole] = useState(WorkspaceRole.MEMBER);
     const [isPending, startTransition] = useTransition();
   
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -37,7 +38,7 @@ export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
         try {
           await inviteMember(workspaceId, {
             email: form.get("email") as string,
-            role: role as "ADMIN" | "MEMBER",
+            role: role as typeof WorkspaceRole.ADMIN | typeof WorkspaceRole.MEMBER,
           });
         setOpen(false);
         router.refresh();
@@ -74,8 +75,8 @@ export function InviteMemberDialog({ workspaceId }: { workspaceId: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ADMIN">Administrateur</SelectItem>
-                <SelectItem value="MEMBER">Membre</SelectItem>
+                <SelectItem value={WorkspaceRole.ADMIN}>Administrateur</SelectItem>
+                <SelectItem value={WorkspaceRole.MEMBER}>Membre</SelectItem>
               </SelectContent>
             </Select>
           </div>

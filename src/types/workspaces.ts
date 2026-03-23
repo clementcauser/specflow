@@ -5,12 +5,12 @@ import type {
   WorkspaceProductStage,
   WorkspaceRole,
   WorkspacePlan,
-  InvitationStatus as PrismaInvitationStatus,
-} from "@prisma/client";
+  InvitationStatus,
+} from "@/lib/enums";
 
 export type Role = WorkspaceRole;
 export type Plan = WorkspacePlan;
-export type InvitationStatus = PrismaInvitationStatus;
+export type { InvitationStatus };
 
 export const ROLE_LABELS: Record<Role, string> = {
   OWNER: "Propriétaire",

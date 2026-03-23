@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import type { WorkspaceType } from "@prisma/client";
+import { WorkspaceType, WorkspacePlan, WorkspaceProductType } from "@/lib/enums";
 
 function slugify(v: string) {
   return v
@@ -33,11 +33,11 @@ const PROFILES = [
 ];
 
 const PRODUCTS = [
-  { value: "LANDING_PAGE", label: "Sites vitrines / institutionnels" },
-  { value: "ECOMMERCE", label: "E-commerce" },
-  { value: "SAAS", label: "SaaS / application web" },
-  { value: "MOBILE", label: "Application mobile" },
-  { value: "API", label: "API / back-end" },
+  { value: WorkspaceProductType.LANDING_PAGE, label: "Sites vitrines / institutionnels" },
+  { value: WorkspaceProductType.ECOMMERCE, label: "E-commerce" },
+  { value: WorkspaceProductType.SAAS, label: "SaaS / application web" },
+  { value: WorkspaceProductType.MOBILE, label: "Application mobile" },
+  { value: WorkspaceProductType.API, label: "API / back-end" },
 ];
 
 type Step = 1 | 2 | 3;
@@ -70,8 +70,8 @@ export default function OnboardingPage() {
         const workspace = await createWorkspace({
           name,
           slug,
-          plan: "FREE",
-          type: workspaceType ?? "AGENCY",
+          plan: WorkspacePlan.FREE,
+          type: workspaceType ?? WorkspaceType.AGENCY,
           specialties: [],
         });
         await switchActiveWorkspace(workspace.id);

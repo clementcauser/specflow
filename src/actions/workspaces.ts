@@ -6,6 +6,15 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
+import {
+  WorkspaceType,
+  WorkspacePlan,
+  WorkspaceTeamSize,
+  WorkspaceProductType,
+  WorkspaceProductStage,
+  WorkspaceRole,
+  InvitationStatus,
+} from "@/lib/enums";
 
 // ─── Schemas de validation ────────────────────────────────────────────────
 
@@ -19,16 +28,16 @@ const workspaceSchema = z.object({
       /^[a-z0-9-]+$/,
       "Uniquement des lettres minuscules, chiffres et tirets",
     ),
-  type: z.enum(["AGENCY", "PRODUCT", "FREELANCE"] as const),
-  plan: z.enum(["FREE", "PRO", "ENTERPRISE"] as const).default("FREE"),
+  type: z.enum([WorkspaceType.AGENCY, WorkspaceType.PRODUCT, WorkspaceType.FREELANCE]),
+  plan: z.enum([WorkspacePlan.FREE, WorkspacePlan.PRO, WorkspacePlan.ENTERPRISE]).default(WorkspacePlan.FREE),
   // AGENCY
-  teamSize: z.enum(["SOLO", "SMALL", "MEDIUM", "LARGE"] as const).optional(),
-  specialties: z.array(z.enum(["ECOMMERCE", "SAAS", "MARKETPLACE", "LANDING_PAGE", "MOBILE", "DESKTOP", "API", "IOT", "AI", "OTHER"] as const)).default([]),
+  teamSize: z.enum([WorkspaceTeamSize.SOLO, WorkspaceTeamSize.SMALL, WorkspaceTeamSize.MEDIUM, WorkspaceTeamSize.LARGE]).optional(),
+  specialties: z.array(z.enum([WorkspaceProductType.ECOMMERCE, WorkspaceProductType.SAAS, WorkspaceProductType.MARKETPLACE, WorkspaceProductType.LANDING_PAGE, WorkspaceProductType.MOBILE, WorkspaceProductType.DESKTOP, WorkspaceProductType.API, WorkspaceProductType.IOT, WorkspaceProductType.AI, WorkspaceProductType.OTHER])).default([]),
   // PRODUCT
   tagline: z.string().max(150).optional(),
   productDescription: z.string().max(1000).optional(),
   techStack: z.string().max(200).optional(),
-  productStage: z.enum(["PRE_MVP", "MVP", "LIVE", "MATURE"] as const).optional(),
+  productStage: z.enum([WorkspaceProductStage.PRE_MVP, WorkspaceProductStage.MVP, WorkspaceProductStage.LIVE, WorkspaceProductStage.MATURE]).optional(),
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -83,7 +92,7 @@ export async function createWorkspace(_data: z.infer<typeof workspaceSchema>) {
       techStack: data.techStack,
       productStage: data.productStage,
       members: {
-        create: { userId: session.user.id, role: "OWNER" },
+        create: { userId: session.user.id, role: WorkspaceRole.OWNER },
       },
     },
   });
@@ -104,8 +113,8 @@ export async function updateWorkspace(
 ) {
   const session = await requireSession();
   await assertRole(session.user.id, workspaceId, [
-    "OWNER",
-    "ADMIN",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
 
   const parsed = workspaceSchema.partial().parse(data);
@@ -128,7 +137,7 @@ export async function updateWorkspace(
 
 export async function deleteWorkspace(workspaceId: string) {
   const session = await requireSession();
-  await assertRole(session.user.id, workspaceId, ["OWNER"]);
+  await assertRole(session.user.id, workspaceId, [WorkspaceRole.OWNER]);
 
   const memberCount = await prisma.member.count({
     where: { workspaceId },
@@ -164,9 +173,9 @@ export async function getUserWorkspaces() {
 export async function getWorkspaceWithMembers(workspaceId: string) {
   const session = await requireSession();
   await assertRole(session.user.id, workspaceId, [
-    "OWNER",
-    "ADMIN",
-    "MEMBER",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
+    WorkspaceRole.MEMBER,
   ]);
 
   return prisma.workspace.findUniqueOrThrow({
@@ -179,7 +188,7 @@ export async function getWorkspaceWithMembers(workspaceId: string) {
         orderBy: { createdAt: "asc" },
       },
       invitations: {
-        where: { status: "PENDING" },
+        where: { status: InvitationStatus.PENDING },
         orderBy: { createdAt: "desc" },
       },
     },

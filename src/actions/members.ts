@@ -7,6 +7,7 @@ import { canManageRole } from "@/types/workspaces";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
+import { WorkspaceRole, InvitationStatus } from "@/lib/enums";
 
 function escapeHtml(str: string): string {
   return str
@@ -46,8 +47,8 @@ async function assertRole(
 const inviteSchema = z.object({
   email: z.email(),
   role: z
-    .enum(["ADMIN", "MEMBER"] as const)
-    .default("MEMBER"),
+    .enum([WorkspaceRole.ADMIN, WorkspaceRole.MEMBER])
+    .default(WorkspaceRole.MEMBER),
 });
 
 export async function inviteMember(
@@ -56,8 +57,8 @@ export async function inviteMember(
 ) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "OWNER",
-    "ADMIN",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
   const parsed = inviteSchema.parse(data);
 
@@ -79,7 +80,7 @@ export async function inviteMember(
     },
     update: {
       role: parsed.role,
-      status: "PENDING",
+      status: InvitationStatus.PENDING,
       expiresAt,
       inviterId: session.user.id,
     },
@@ -87,7 +88,7 @@ export async function inviteMember(
       workspaceId,
       email: parsed.email,
       role: parsed.role,
-      status: "PENDING",
+      status: InvitationStatus.PENDING,
       expiresAt,
       inviterId: session.user.id,
     },
@@ -141,7 +142,7 @@ export async function cancelInvitation(
 
   await prisma.invitation.update({
     where: { id: invitationId, workspaceId },
-    data: { status: "CANCELLED" },
+    data: { status: InvitationStatus.CANCELLED },
   });
 
   revalidatePath("/settings/workspaces");
@@ -156,8 +157,8 @@ export async function updateMemberRole(
 ) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "OWNER",
-    "ADMIN",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
 
   const target = await prisma.member.findUniqueOrThrow({
@@ -185,8 +186,8 @@ export async function updateMemberRole(
 export async function removeMember(workspaceId: string, memberId: string) {
   const session = await requireSession();
   const actorRole = await assertRole(session.user.id, workspaceId, [
-    "OWNER",
-    "ADMIN",
+    WorkspaceRole.OWNER,
+    WorkspaceRole.ADMIN,
   ]);
 
   const target = await prisma.member.findUniqueOrThrow({
@@ -198,7 +199,7 @@ export async function removeMember(workspaceId: string, memberId: string) {
     throw new Error("Utilisez 'Quitter l'espace de travail' à la place");
   if (!canManageRole(actorRole, target.role as Role))
     throw new Error("Permission insuffisante");
-  if (target.role === "OWNER")
+  if (target.role === WorkspaceRole.OWNER)
     throw new Error("Impossible de retirer le propriétaire");
 
   await prisma.member.delete({ where: { id: memberId } });
@@ -210,7 +211,7 @@ export async function leaveWorkspace(workspaceId: string) {
   const session = await requireSession();
   const role = await getMemberRole(session.user.id, workspaceId);
   if (!role) throw new Error("Vous n'êtes pas membre");
-  if (role === "OWNER")
+  if (role === WorkspaceRole.OWNER)
     throw new Error("Transférez la propriété avant de quitter");
 
   await prisma.member.delete({
@@ -229,7 +230,7 @@ export async function acceptInvitation(token: string) {
     where: { id: token },
   });
 
-  if (invitation.status !== "PENDING")
+  if (invitation.status !== InvitationStatus.PENDING)
     throw new Error("Invitation déjà utilisée");
   if (invitation.expiresAt < new Date()) throw new Error("Invitation expirée");
 
@@ -253,7 +254,7 @@ export async function acceptInvitation(token: string) {
     }),
     prisma.invitation.update({
       where: { id: token },
-      data: { status: "ACCEPTED" },
+      data: { status: InvitationStatus.ACCEPTED },
     }),
   ]);
 }

@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/actions/tenant";
+import { WorkspaceType } from "@/lib/enums";
 import { NewEpicForm } from "@/components/epics/new-epic-form";
 
 export default async function NewEpicPage() {
   const workspace = await getActiveWorkspace();
 
   if (!workspace) redirect("/onboarding");
-  if (workspace.type !== "PRODUCT") redirect("/dashboard");
+  if (workspace.type !== WorkspaceType.PRODUCT) redirect("/dashboard");
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
