@@ -6,15 +6,6 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
-import type {
-  InvitationStatus,
-  WorkspacePlan,
-  WorkspaceProductStage,
-  WorkspaceProductType,
-  WorkspaceRole,
-  WorkspaceTeamSize,
-  WorkspaceType,
-} from "@prisma/client";
 
 // ─── Schemas de validation ────────────────────────────────────────────────
 

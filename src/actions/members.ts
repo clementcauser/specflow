@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import type { Role } from "@/types/workspaces";
 import { canManageRole } from "@/types/workspaces";
-import type { InvitationStatus, WorkspaceRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
