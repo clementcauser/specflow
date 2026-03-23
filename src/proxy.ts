@@ -23,7 +23,10 @@ export async function proxy(request: NextRequest) {
   const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
   if (!isPublic && !isAuthenticated && !pathname.startsWith("/api")) {
     const url = new URL("/sign-in", request.url);
-    url.searchParams.set("callbackUrl", pathname);
+    // N'accepte que les chemins internes (commence par /) pour éviter les open redirects
+    if (pathname.startsWith("/") && !pathname.startsWith("//")) {
+      url.searchParams.set("callbackUrl", pathname);
+    }
     return NextResponse.redirect(url);
   }
 

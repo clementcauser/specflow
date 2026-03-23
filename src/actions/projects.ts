@@ -58,7 +58,15 @@ export async function createProject(data: z.infer<typeof createProjectSchema>) {
 export async function getProject(projectId: string) {
   const session = await requireSession();
 
-  const project = await prisma.project.findUniqueOrThrow({
+  // Vérification d'accès avant le chargement complet de la ressource
+  const projectMeta = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { workspaceId: true },
+  });
+  if (!projectMeta) throw new Error("Projet introuvable");
+  await assertMember(session.user.id, projectMeta.workspaceId);
+
+  return prisma.project.findUniqueOrThrow({
     where: { id: projectId },
     include: {
       Client: { select: { id: true, name: true } },
@@ -75,9 +83,6 @@ export async function getProject(projectId: string) {
       },
     },
   });
-
-  await assertMember(session.user.id, project.workspaceId);
-  return project;
 }
 
 // ─── Update ────────────────────────────────────────────────────────────────

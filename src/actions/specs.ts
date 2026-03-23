@@ -32,14 +32,31 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
   if (!member) throw new Error("Accès refusé");
 
   if (member.workspace.plan === "FREE") {
-    const count = await prisma.spec.count({
-      where: { workspaceId: parsed.workspaceId },
+    // Vérification et création dans une transaction pour éviter la race condition
+    const spec = await prisma.$transaction(async (tx) => {
+      const count = await tx.spec.count({
+        where: { workspaceId: parsed.workspaceId },
+      });
+      if (count >= FREE_PLAN_LIMIT) {
+        throw new Error(
+          "Limite du plan gratuit atteinte. Passez au plan Pro pour continuer.",
+        );
+      }
+      return tx.spec.create({
+        data: {
+          title: parsed.title,
+          prompt: parsed.prompt,
+          workspaceId: parsed.workspaceId,
+          projectId: parsed.projectId,
+          epicId: parsed.epicId,
+          creatorId: session.user.id,
+          status: "DRAFT",
+          content: { _sections: parsed.sections },
+        },
+      });
     });
-    if (count >= FREE_PLAN_LIMIT) {
-      throw new Error(
-        "Limite du plan gratuit atteinte. Passez au plan Pro pour continuer.",
-      );
-    }
+    revalidatePath("/specs");
+    return spec;
   }
 
   const spec = await prisma.spec.create({
@@ -117,6 +134,24 @@ export async function updateSpecContent(
   content: Record<string, string>,
   status: "DONE" | "ERROR",
 ) {
+  const session = await requireSession();
+
+  const spec = await prisma.spec.findUnique({
+    where: { id: specId },
+    select: { workspaceId: true },
+  });
+  if (!spec?.workspaceId) throw new Error("Spec introuvable");
+
+  const member = await prisma.member.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId: session.user.id,
+        workspaceId: spec.workspaceId,
+      },
+    },
+  });
+  if (!member) throw new Error("Accès refusé");
+
   return prisma.spec.update({
     where: { id: specId },
     data: { content, status },

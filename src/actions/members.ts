@@ -9,6 +9,15 @@ import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { z } from "zod";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function getMemberRole(
@@ -96,6 +105,9 @@ export async function inviteMember(
 
   const inviteUrl = `${process.env.BETTER_AUTH_URL}/invite?token=${invitation.id}`;
 
+  const safeWorkspaceName = escapeHtml(workspace.name);
+  const safeInviteUrl = encodeURI(inviteUrl);
+
   await resend.emails.send({
     from: "Specflow <onboarding@resend.dev>",
     to: parsed.email,
@@ -103,13 +115,13 @@ export async function inviteMember(
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
         <h2 style="font-size:20px;font-weight:600;margin-bottom:16px">
-          Vous avez été invité à rejoindre ${workspace.name}
+          Vous avez été invité à rejoindre ${safeWorkspaceName}
         </h2>
         <p style="color:#555;margin-bottom:24px">
           Cliquez sur le bouton ci-dessous pour accepter l'invitation.
           Ce lien est valable 48h.
         </p>
-        <a href="${inviteUrl}"
+        <a href="${safeInviteUrl}"
            style="display:inline-block;background:#18181b;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500">
           Rejoindre l'espace de travail
         </a>

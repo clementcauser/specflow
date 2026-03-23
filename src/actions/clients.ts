@@ -65,7 +65,15 @@ export async function getClients(workspaceId: string) {
 export async function getClient(clientId: string) {
   const session = await requireSession();
 
-  const client = await prisma.client.findUniqueOrThrow({
+  // Vérification d'accès avant le chargement complet de la ressource
+  const clientMeta = await prisma.client.findUnique({
+    where: { id: clientId },
+    select: { workspaceId: true },
+  });
+  if (!clientMeta) throw new Error("Client introuvable");
+  await assertMember(session.user.id, clientMeta.workspaceId);
+
+  return prisma.client.findUniqueOrThrow({
     where: { id: clientId },
     include: {
       Project: {
@@ -82,9 +90,6 @@ export async function getClient(clientId: string) {
       },
     },
   });
-
-  await assertMember(session.user.id, client.workspaceId);
-  return client;
 }
 
 // ─── Update ────────────────────────────────────────────────────────────────

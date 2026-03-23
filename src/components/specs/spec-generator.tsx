@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
 import {
   SECTIONS_CONFIG,
@@ -31,6 +31,21 @@ type Props = {
 };
 
 type SectionState = "pending" | "generating" | "done" | "error";
+
+type SseEvent =
+  | { type: "section_start"; section: SpecSection }
+  | { type: "token"; section: SpecSection; token: string }
+  | { type: "section_done"; section: SpecSection; content: string }
+  | { type: "done" }
+  | { type: "error"; message: string };
+
+const MemoizedMarkdown = memo(function MemoizedMarkdown({
+  content,
+}: {
+  content: string;
+}) {
+  return <ReactMarkdown>{content}</ReactMarkdown>;
+});
 
 export function SpecGenerator({ spec }: Props) {
   const router = useRouter();
@@ -98,7 +113,7 @@ export function SpecGenerator({ spec }: Props) {
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           try {
-            const event = JSON.parse(line.slice(6));
+            const event = JSON.parse(line.slice(6)) as SseEvent;
             handleEvent(event);
           } catch {}
         }
@@ -113,8 +128,7 @@ export function SpecGenerator({ spec }: Props) {
     startGeneration();
   }, [startGeneration]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function handleEvent(event: any) {
+  function handleEvent(event: SseEvent) {
     switch (event.type) {
       case "section_start":
         setActiveSection(event.section);
@@ -233,7 +247,7 @@ export function SpecGenerator({ spec }: Props) {
                           "after:content-['▋'] after:animate-pulse after:text-primary",
                       )}
                     >
-                      <ReactMarkdown>{sectionContent}</ReactMarkdown>
+                      <MemoizedMarkdown content={sectionContent} />
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
