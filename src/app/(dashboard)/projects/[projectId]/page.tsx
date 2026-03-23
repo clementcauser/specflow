@@ -7,7 +7,7 @@ import { SpecList } from "@/components/specs/spec-list";
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { WORKSPACE_PRODUCT_TYPE_LABELS } from "@/types/workspaces";
-import { WorkspaceProductType } from "@prisma/client";
+import type { WorkspaceProductType } from "@prisma/client";
 
 export default async function ProjectDetailPage({
   params,

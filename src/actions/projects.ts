@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import { WorkspaceProductType } from "@prisma/client";
+import type { WorkspaceProductType } from "@prisma/client";
 import { randomUUID } from "crypto";
 
 async function assertMember(userId: string, workspaceId: string) {
@@ -22,7 +22,7 @@ const createProjectSchema = z.object({
   clientId: z.string().optional(),
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  productType: z.nativeEnum(WorkspaceProductType),
+  productType: z.enum(["ECOMMERCE", "SAAS", "MARKETPLACE", "LANDING_PAGE", "MOBILE", "DESKTOP", "API", "IOT", "AI", "OTHER"] as const),
   stack: z.string().max(200).optional(),
   clientName: z.string().max(100).optional(),
 });

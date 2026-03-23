@@ -21,7 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Plan } from "@/types/workspaces";
-import { WorkspacePlan } from "@prisma/client";
 
 type Props = {
   workspace: {
@@ -98,9 +97,9 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={WorkspacePlan.FREE}>Gratuit</SelectItem>
-                <SelectItem value={WorkspacePlan.PRO}>Pro</SelectItem>
-                <SelectItem value={WorkspacePlan.ENTERPRISE}>
+                <SelectItem value="FREE">Gratuit</SelectItem>
+                <SelectItem value="PRO">Pro</SelectItem>
+                <SelectItem value="ENTERPRISE">
                   Entreprise
                 </SelectItem>
               </SelectContent>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
+import type {
   WorkspaceType,
   WorkspaceTeamSize,
   WorkspaceProductStage,
@@ -49,9 +49,9 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 
 // ─── Step 1 — Type selection ──────────────────────────────────────────────
 
-const WORKSPACE_TYPES = [
+const WORKSPACE_TYPES: { type: WorkspaceType; emoji: string; label: string; tagline: string; bullets: string[] }[] = [
   {
-    type: WorkspaceType.AGENCY,
+    type: "AGENCY",
     emoji: "🏢",
     label: "Agence",
     tagline: "Je crée des specs pour des projets clients distincts",
@@ -62,7 +62,7 @@ const WORKSPACE_TYPES = [
     ],
   },
   {
-    type: WorkspaceType.PRODUCT,
+    type: "PRODUCT",
     emoji: "🚀",
     label: "Produit",
     tagline: "Je travaille sur un produit en évolution continue",
@@ -73,7 +73,7 @@ const WORKSPACE_TYPES = [
     ],
   },
   {
-    type: WorkspaceType.FREELANCE,
+    type: "FREELANCE",
     emoji: "⚡",
     label: "Freelance",
     tagline: "Je gère plusieurs clients en parallèle",
@@ -141,7 +141,7 @@ function StepType({
 
 // ─── Step 2 — Workspace info ──────────────────────────────────────────────
 
-const TEAM_SIZES = Object.values(WorkspaceTeamSize);
+const TEAM_SIZES: WorkspaceTeamSize[] = ["SOLO", "SMALL", "MEDIUM", "LARGE"];
 
 function StepInfo({
   type,
@@ -161,16 +161,16 @@ function StepInfo({
   onTeamSizeChange: (v: WorkspaceTeamSize) => void;
 }) {
   const nameLabel =
-    type === WorkspaceType.AGENCY
+    type === "AGENCY"
       ? "Nom de l'agence"
-      : type === WorkspaceType.PRODUCT
+      : type === "PRODUCT"
         ? "Nom du produit"
         : "Ton nom ou marque";
 
   const namePlaceholder =
-    type === WorkspaceType.AGENCY
+    type === "AGENCY"
       ? "Agence Dupont"
-      : type === WorkspaceType.PRODUCT
+      : type === "PRODUCT"
         ? "MonSaaS"
         : "Thomas Roux Dev";
 
@@ -209,7 +209,7 @@ function StepInfo({
           </p>
         </div>
 
-        {type === WorkspaceType.AGENCY && (
+        {type === "AGENCY" && (
           <div className="space-y-2">
             <Label>Taille de l&apos;équipe</Label>
             <div className="flex gap-2 flex-wrap">
@@ -241,8 +241,8 @@ function StepInfo({
 
 // ─── Step 3 — Business context ────────────────────────────────────────────
 
-const SPECIALTIES = Object.values(WorkspaceProductType);
-const PRODUCT_STAGES = Object.values(WorkspaceProductStage);
+const SPECIALTIES: WorkspaceProductType[] = ["ECOMMERCE", "SAAS", "MARKETPLACE", "LANDING_PAGE", "MOBILE", "DESKTOP", "API", "IOT", "AI", "OTHER"];
+const PRODUCT_STAGES: WorkspaceProductStage[] = ["PRE_MVP", "MVP", "LIVE", "MATURE"];
 
 function StepContext({
   type,
@@ -277,7 +277,7 @@ function StepContext({
     );
   }
 
-  if (type === WorkspaceType.AGENCY) {
+  if (type === "AGENCY") {
     return (
       <div className="space-y-6">
         <div>
@@ -310,7 +310,7 @@ function StepContext({
     );
   }
 
-  if (type === WorkspaceType.PRODUCT) {
+  if (type === "PRODUCT") {
     return (
       <div className="space-y-6">
         <div>
@@ -460,9 +460,9 @@ export function CreateWorkspaceFlow() {
           productStage: productStage ?? undefined,
         });
         router.push(
-          type === WorkspaceType.PRODUCT
+          type === "PRODUCT"
             ? `/epics/new`
-            : type === WorkspaceType.FREELANCE
+            : type === "FREELANCE"
               ? `/clients/new`
               : `/workspaces`,
         );
@@ -475,9 +475,9 @@ export function CreateWorkspaceFlow() {
   }
 
   const submitLabel =
-    type === WorkspaceType.AGENCY
+    type === "AGENCY"
       ? "Créer et aller aux projets"
-      : type === WorkspaceType.PRODUCT
+      : type === "PRODUCT"
         ? "Créer et aller aux epics"
         : "Créer et ajouter un client";
 

@@ -8,7 +8,7 @@ import {
   SECTIONS_ORDER,
   type SpecSection,
 } from "@/types/spec";
-import { SpecStatus, WorkspaceProductType, WorkspaceType } from "@prisma/client";
+import type { WorkspaceProductType, WorkspaceType } from "@prisma/client";
 import {
   WORKSPACE_PRODUCT_TYPE_LABELS,
   WORKSPACE_TYPE_LABELS,
@@ -57,14 +57,14 @@ function buildWorkspaceContext(workspace: {
     `- Type : ${typeLabel}`,
   ];
 
-  if (workspace.type === WorkspaceType.AGENCY) {
+  if (workspace.type === "AGENCY") {
     const specialtiesList = workspace.specialties
       .map((p) => WORKSPACE_PRODUCT_TYPE_LABELS[p] ?? p)
       .join(", ");
     if (specialtiesList) lines.push(`- Spécialités de l'agence : ${specialtiesList}`);
     if (workspace.teamSize)
       lines.push(`- Taille d'équipe : ${WORKSPACE_TEAM_SIZE_LABELS[workspace.teamSize as keyof typeof WORKSPACE_TEAM_SIZE_LABELS] ?? workspace.teamSize}`);
-  } else if (workspace.type === WorkspaceType.PRODUCT) {
+  } else if (workspace.type === "PRODUCT") {
     if (workspace.tagline) lines.push(`- Tagline : ${workspace.tagline}`);
     if (workspace.productDescription) lines.push(`- Description du produit : ${workspace.productDescription}`);
     if (workspace.techStack) lines.push(`- Stack technique : ${workspace.techStack}`);
@@ -79,20 +79,20 @@ function buildWorkspaceContext(workspace: {
 
 function buildPersona(type: WorkspaceType): string {
   switch (type) {
-    case WorkspaceType.AGENCY:
+    case "AGENCY":
       return `Tu es un expert en rédaction de spécifications fonctionnelles pour agences web.
 Tu rédiges des specs destinées à être présentées à un client externe et utilisées par une équipe de développement.
 Le ton est professionnel, orienté livrable, précis sur les critères d'acceptance.
 Chaque user story doit être immédiatement exploitable pour un sprint planning.`;
 
-    case WorkspaceType.PRODUCT:
+    case "PRODUCT":
       return `Tu es un expert en Product Management et rédaction de specs pour équipes produit.
 Tu rédiges des specs de features ou d'epics pour un produit existant, utilisées par une équipe interne.
 Le ton est orienté équipe produit : pragmatique, contextuel, avec une attention particulière
 aux impacts sur les fonctionnalités existantes et à la cohérence avec la vision produit.
 Le contexte technique et produit du workspace est déjà connu de l'équipe — ne le réexplique pas.`;
 
-    case WorkspaceType.FREELANCE:
+    case "FREELANCE":
       return `Tu es un expert en rédaction de spécifications fonctionnelles pour développeurs freelance.
 Tu rédiges des specs claires et autonomes, utilisées à la fois pour cadrer le projet avec le client
 et comme référence de développement.
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
 
   await prisma.spec.update({
     where: { id: specId },
-    data: { status: SpecStatus.GENERATING },
+    data: { status: "GENERATING" },
   });
 
   // Construit le contexte selon le type de spec :
@@ -287,14 +287,14 @@ export async function POST(request: NextRequest) {
 
         await prisma.spec.update({
           where: { id: specId },
-          data: { content: sections, status: SpecStatus.DONE },
+          data: { content: sections, status: "DONE" },
         });
 
         send({ type: "done" });
       } catch {
         await prisma.spec.update({
           where: { id: specId },
-          data: { status: SpecStatus.ERROR },
+          data: { status: "ERROR" },
         });
         send({ type: "error", message: "Erreur lors de la génération" });
       } finally {

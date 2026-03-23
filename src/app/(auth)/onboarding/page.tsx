@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { WorkspacePlan, WorkspaceType } from "@prisma/client";
+import type { WorkspaceType } from "@prisma/client";
 
 function slugify(v: string) {
   return v
@@ -70,8 +70,8 @@ export default function OnboardingPage() {
         const workspace = await createWorkspace({
           name,
           slug,
-          plan: WorkspacePlan.FREE,
-          type: workspaceType ?? WorkspaceType.AGENCY,
+          plan: "FREE",
+          type: workspaceType ?? "AGENCY",
           specialties: [],
         });
         await switchActiveWorkspace(workspace.id);
