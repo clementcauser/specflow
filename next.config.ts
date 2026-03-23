@@ -28,15 +28,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Empêche Webpack de bundler @prisma/client côté client
-  transpilePackages: [],
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Exclut @prisma/client du bundle client
-      config.externals.push("@prisma/client");
-    }
-    return config;
-  },
+  // Compatible Webpack et Turbopack — exclut @prisma/client des bundles serveur
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
 
   async headers() {
     return [
