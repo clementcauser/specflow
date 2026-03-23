@@ -82,7 +82,7 @@ export default async function ClientDetailPage({
           </div>
         ) : (
           <div className="divide-y rounded-lg border">
-            {client.Project.map((project) => (
+            {client.Project.map((project: Awaited<ReturnType<typeof getClient>>["Project"][number]) => (
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
