@@ -1,10 +1,12 @@
 import { getActiveWorkspace } from "@/actions/tenant";
 import { getEpic } from "@/actions/epics";
 import { getProject } from "@/actions/projects";
+import { getWorkspacePlanInfo } from "@/actions/specs";
 import { redirect } from "next/navigation";
 import { NewSpecForm } from "@/components/specs/new-spec-form";
 import { NewEpicSpecForm } from "@/components/specs/new-epic-spec-form";
 import { NewProjectSpecForm } from "@/components/specs/new-project-spec-form";
+import { PlanLimitBanner } from "@/components/plans/plan-limit-banner";
 
 export default async function NewSpecPage({
   searchParams,
@@ -14,6 +16,9 @@ export default async function NewSpecPage({
   const { epicId, projectId } = await searchParams;
   const activeWorkspace = await getActiveWorkspace();
   if (!activeWorkspace) redirect("/onboarding");
+
+  const planInfo = await getWorkspacePlanInfo(activeWorkspace.id);
+  const isAtLimit = planInfo.isAtLimit;
 
   if (epicId) {
     let epic;
@@ -31,11 +36,19 @@ export default async function NewSpecPage({
             Décrivez ce que vous souhaitez spécifier pour cette epic.
           </p>
         </div>
-        <NewEpicSpecForm
-          workspaceId={activeWorkspace.id}
-          epicId={epicId}
-          epicTitle={epic.title}
-        />
+        {planInfo.plan === "FREE" && planInfo.limit !== null && (
+          <PlanLimitBanner
+            specsCount={planInfo.specsCount}
+            limit={planInfo.limit}
+          />
+        )}
+        {!isAtLimit && (
+          <NewEpicSpecForm
+            workspaceId={activeWorkspace.id}
+            epicId={epicId}
+            epicTitle={epic.title}
+          />
+        )}
       </div>
     );
   }
@@ -56,13 +69,21 @@ export default async function NewSpecPage({
             Décrivez ce que vous souhaitez spécifier pour ce projet.
           </p>
         </div>
-        <NewProjectSpecForm
-          workspaceId={activeWorkspace.id}
-          projectId={projectId}
-          projectName={project.name}
-          productType={project.productType}
-          stack={project.stack}
-        />
+        {planInfo.plan === "FREE" && planInfo.limit !== null && (
+          <PlanLimitBanner
+            specsCount={planInfo.specsCount}
+            limit={planInfo.limit}
+          />
+        )}
+        {!isAtLimit && (
+          <NewProjectSpecForm
+            workspaceId={activeWorkspace.id}
+            projectId={projectId}
+            projectName={project.name}
+            productType={project.productType}
+            stack={project.stack}
+          />
+        )}
       </div>
     );
   }
@@ -75,7 +96,13 @@ export default async function NewSpecPage({
           Décrivez votre projet et obtenez une spec complète en quelques secondes.
         </p>
       </div>
-      <NewSpecForm workspaceId={activeWorkspace.id} />
+      {planInfo.plan === "FREE" && planInfo.limit !== null && (
+        <PlanLimitBanner
+          specsCount={planInfo.specsCount}
+          limit={planInfo.limit}
+        />
+      )}
+      {!isAtLimit && <NewSpecForm workspaceId={activeWorkspace.id} />}
     </div>
   );
 }

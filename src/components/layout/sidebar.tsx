@@ -26,6 +26,7 @@ import {
   Plus,
   Layers,
   Briefcase,
+  Zap,
 } from "lucide-react";
 
 const BASE_NAV_ITEMS = [
@@ -143,6 +144,25 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
           );
         })}
       </nav>
+
+      {/* Upgrade CTA for Free plan */}
+      {activeWorkspace.plan === "FREE" && (
+        <div className="px-3 pb-2">
+          <Link
+            href="/plans"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-primary/8 border border-primary/20 text-sm text-primary hover:bg-primary/15 transition-colors group"
+            aria-label="Passer au plan Pro"
+          >
+            <Zap className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-xs leading-none">Passer au Pro</p>
+              <p className="text-[10px] text-primary/70 mt-0.5 font-mono">
+                Plan gratuit actif
+              </p>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* User */}
       <div className="px-3 py-3 border-t">
