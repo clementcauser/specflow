@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
@@ -143,46 +144,7 @@ const PLANS = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* ── NAV ─────────────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-        <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-          <span className="font-mono text-sm font-medium text-foreground">
-            Spec<span className="text-primary">Flow</span>
-          </span>
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#how"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Comment ça marche
-            </a>
-            <a
-              href="#output"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Fonctionnalités
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Tarifs
-            </a>
-            <Link
-              href="/blog"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Blog
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-            >
-              Connexion
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <PublicNavbar />
 
       {/* ── ① HERO ──────────────────────────────────────────────────────────── */}
       <section className="pt-36 pb-24 px-6 relative overflow-hidden">
@@ -200,7 +162,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="font-mono text-xs text-muted-foreground">
-              Propulsé par Claude d'Anthropic
+              Propulsé par Claude d&apos;Anthropic
             </span>
           </div>
 
@@ -217,7 +179,7 @@ export default function LandingPage() {
 
           <p className="text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed font-light">
             SpecFlow génère des spécifications fonctionnelles complètes à partir
-            d'un brief.{" "}
+            d&apos;un brief.{" "}
             <span className="text-foreground font-normal">
               User stories, critères Gherkin, personas, hors-périmètre
             </span>{" "}
@@ -266,7 +228,7 @@ export default function LandingPage() {
             {/* Content */}
             <div className="p-6 font-mono text-sm leading-relaxed">
               <p className="text-muted-foreground text-xs mb-3">
-                // Projet : Refonte e-commerce · Next.js + Shopify
+                {"// Projet : Refonte e-commerce · Next.js + Shopify"}
               </p>
               <p className="text-xs mb-4">
                 <span className="text-primary font-medium">generating</span>
@@ -349,7 +311,7 @@ export default function LandingPage() {
           >
             Rédiger une spec,
             <br />
-            c'est{" "}
+            c&apos;est{" "}
             <span className="text-muted-foreground italic">long, ingrat</span>
             <br />
             et souvent raté.
@@ -394,7 +356,7 @@ export default function LandingPage() {
 
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Connecting line */}
-            <div className="hidden md:block absolute top-7 left-[18%] right-[18%] h-px bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
+            <div className="hidden md:block absolute top-7 left-[18%] right-[18%] h-px bg-linear-to-r from-primary/30 via-primary/60 to-primary/30" />
 
             {STEPS.map((s, i) => (
               <div key={i} className="relative">
@@ -408,7 +370,7 @@ export default function LandingPage() {
                   {s.desc}
                 </p>
                 <span className="font-mono text-xs text-muted-foreground/60">
-                  // {s.tag}
+                  {"//"} {s.tag}
                 </span>
               </div>
             ))}
@@ -465,7 +427,7 @@ export default function LandingPage() {
               <span className="w-3 h-3 rounded-full bg-amber-400" />
               <span className="w-3 h-3 rounded-full bg-green-400" />
               <span className="font-mono text-xs text-muted-foreground ml-2">
-                spec_ecommerce.md — Critères d'acceptance
+                spec_ecommerce.md — Critères d&apos;acceptance
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-[200px_1fr]">
@@ -509,19 +471,19 @@ export default function LandingPage() {
                       Scenario:
                     </span>{" "}
                     <span className="text-foreground">
-                      Ajout d'un produit disponible
+                      Ajout d&apos;un produit disponible
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-primary font-medium">Given</span>{" "}
                     <span className="text-muted-foreground">
-                      je suis sur la fiche d'un produit en stock
+                      je suis sur la fiche d&apos;un produit en stock
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-green-600 font-medium">When</span>{" "}
                     <span className="text-muted-foreground">
-                      je clique sur "Ajouter au panier"
+                      je clique sur &quot;Ajouter au panier&quot;
                     </span>
                   </p>
                   <p className="pl-4">
@@ -533,7 +495,7 @@ export default function LandingPage() {
                   <p className="pl-4">
                     <span className="text-violet-500 font-medium">And</span>{" "}
                     <span className="text-muted-foreground">
-                      le compteur du panier s'incrémente de 1
+                      le compteur du panier s&apos;incrémente de 1
                     </span>
                   </p>
                   <p className="pt-2">
@@ -541,31 +503,31 @@ export default function LandingPage() {
                       Scenario:
                     </span>{" "}
                     <span className="text-foreground">
-                      Tentative d'ajout hors stock
+                      Tentative d&apos;ajout hors stock
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-primary font-medium">Given</span>{" "}
                     <span className="text-muted-foreground">
-                      je suis sur la fiche d'un produit épuisé
+                      je suis sur la fiche d&apos;un produit épuisé
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-green-600 font-medium">When</span>{" "}
                     <span className="text-muted-foreground">
-                      j'arrive sur la page
+                      j&apos;arrive sur la page
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-violet-500 font-medium">Then</span>{" "}
                     <span className="text-muted-foreground">
-                      le bouton "Ajouter au panier" est désactivé
+                      le bouton &quot;Ajouter au panier&quot; est désactivé
                     </span>
                   </p>
                   <p className="pl-4">
                     <span className="text-violet-500 font-medium">And</span>{" "}
                     <span className="text-muted-foreground">
-                      un badge "Rupture de stock" est visible
+                      un badge &quot;Rupture de stock&quot; est visible
                     </span>
                   </p>
                 </div>

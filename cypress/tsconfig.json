@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["esnext", "dom"],
+    "types": ["cypress", "node"],
+    "moduleResolution": "node",
+    "strict": true,
+    "baseUrl": "../node_modules",
+    "paths": {
+      "cypress": ["cypress"]
+    }
+  },
+  "include": ["**/*.ts"]
+}

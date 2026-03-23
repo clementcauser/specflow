@@ -36,7 +36,13 @@ const BASE_NAV_ITEMS = [
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];
 
-type Workspace = { id: string; name: string; slug: string; plan: string; type: string };
+type Workspace = {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  type: string;
+};
 
 type Props = {
   user: { name: string; email: string; image?: string | null };
@@ -60,7 +66,9 @@ export function Sidebar({ user, activeWorkspace, workspaces }: Props) {
     <aside className="hidden md:flex flex-col w-60 border-r bg-background shrink-0">
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b">
-        <span className="font-semibold text-base tracking-tight">SpecFlow</span>
+        <span className="font-semibold text-base tracking-tight">
+          Spec<span className="text-primary">Flow</span>
+        </span>
       </div>
 
       {/* Workspace switcher */}

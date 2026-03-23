@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllArticles, formatDate, SITE_URL } from "@/lib/blog";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 
 export const metadata: Metadata = {
   title: "Blog — Méthodes agiles, specs et product management | SpecFlow",
@@ -63,44 +64,7 @@ export default function BlogListPage() {
       />
 
       <div className="min-h-screen bg-background text-foreground">
-        {/* ── NAV ─────────────────────────────────────────────────────────── */}
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-          <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-mono text-sm font-medium text-foreground"
-            >
-              Spec<span className="text-primary">Flow</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-8">
-              <Link
-                href="/#how"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Comment ça marche
-              </Link>
-              <Link
-                href="/#pricing"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Tarifs
-              </Link>
-              <Link
-                href="/blog"
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                aria-current="page"
-              >
-                Blog
-              </Link>
-              <Link
-                href="/login"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Connexion
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PublicNavbar activePage="blog" />
 
         {/* ── HEADER ──────────────────────────────────────────────────────── */}
         <header className="pt-36 pb-16 px-6 border-b border-border">

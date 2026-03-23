@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-const PUBLIC_ROUTES = [
+// Prefixes : toute route commençant par ces valeurs est publique
+const PUBLIC_PREFIXES = [
+  "/blog",
   "/sign-in",
   "/sign-up",
   "/verify-email",
@@ -9,6 +11,8 @@ const PUBLIC_ROUTES = [
   "/invite",
   "/onboarding",
 ];
+// Correspondances exactes publiques
+const PUBLIC_EXACT = ["/"];
 const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 
 export async function proxy(request: NextRequest) {
@@ -20,7 +24,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+  const isPublic =
+    PUBLIC_EXACT.includes(pathname) ||
+    PUBLIC_PREFIXES.some((r) => pathname.startsWith(r));
   if (!isPublic && !isAuthenticated && !pathname.startsWith("/api")) {
     const url = new URL("/sign-in", request.url);
     // N'accepte que les chemins internes (commence par /) pour éviter les open redirects

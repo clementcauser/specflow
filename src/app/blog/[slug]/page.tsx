@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
+import type { ReactNode } from "react";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 import {
   getArticleBySlug,
   getAllSlugs,
@@ -10,6 +12,38 @@ import {
   formatDate,
   SITE_URL,
 } from "@/lib/blog";
+
+// ─── TOC helpers ───────────────────────────────────────────────────────────
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+function childrenToText(children: ReactNode): string {
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) return children.map(childrenToText).join("");
+  if (children !== null && typeof children === "object" && "props" in children)
+    return childrenToText(
+      (children as { props: { children?: ReactNode } }).props.children,
+    );
+  return "";
+}
+
+function getHeadings(content: string) {
+  return content
+    .split("\n")
+    .filter((line) => line.startsWith("## "))
+    .map((line) => {
+      const text = line.replace(/^## /, "").trim();
+      return { text, id: slugify(text) };
+    });
+}
 
 // ─── Static params ─────────────────────────────────────────────────────────
 
@@ -65,7 +99,8 @@ export async function generateMetadata({
 const mdComponents: Components = {
   h2: ({ children }) => (
     <h2
-      className="font-serif text-2xl font-bold text-foreground mt-10 mb-4 leading-snug tracking-tight"
+      id={slugify(childrenToText(children))}
+      className="font-serif text-2xl font-bold text-foreground mt-10 mb-4 leading-snug tracking-tight scroll-mt-20"
       style={{ fontFamily: "Merriweather, serif" }}
     >
       {children}
@@ -101,7 +136,9 @@ const mdComponents: Components = {
     </ol>
   ),
   li: ({ children }) => (
-    <li className="text-sm text-muted-foreground leading-relaxed">{children}</li>
+    <li className="text-sm text-muted-foreground leading-relaxed">
+      {children}
+    </li>
   ),
   blockquote: ({ children }) => (
     <blockquote className="border-l-2 border-primary pl-4 my-4 italic text-muted-foreground text-sm">
@@ -165,6 +202,7 @@ export default async function BlogArticlePage({
   if (!article) notFound();
 
   const url = `${SITE_URL}/blog/${article.slug}`;
+  const headings = getHeadings(article.content);
   const allArticles = getAllArticles();
   const currentIndex = allArticles.findIndex((a) => a.slug === article.slug);
   const prevArticle = allArticles[currentIndex + 1] ?? null; // older
@@ -222,43 +260,7 @@ export default async function BlogArticlePage({
       />
 
       <div className="min-h-screen bg-background text-foreground">
-        {/* ── NAV ───────────────────────────────────────────────────────── */}
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-          <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-mono text-sm font-medium text-foreground"
-            >
-              Spec<span className="text-primary">Flow</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-8">
-              <Link
-                href="/#how"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Comment ça marche
-              </Link>
-              <Link
-                href="/#pricing"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Tarifs
-              </Link>
-              <Link
-                href="/blog"
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                Blog
-              </Link>
-              <Link
-                href="/login"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Connexion
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <PublicNavbar activePage="blog" />
 
         {/* ── BREADCRUMB ────────────────────────────────────────────────── */}
         <div className="pt-20 px-6">
@@ -342,106 +344,134 @@ export default async function BlogArticlePage({
 
         {/* ── ARTICLE CONTENT ───────────────────────────────────────────── */}
         <main className="py-12 px-6">
-          <div className="mx-auto max-w-3xl">
-            <article>
-              <ReactMarkdown components={mdComponents}>
-                {article.content}
-              </ReactMarkdown>
-            </article>
+          <div className="mx-auto max-w-5xl flex gap-16 items-start">
+            <div className="flex-1 min-w-0">
+              <article>
+                <ReactMarkdown components={mdComponents}>
+                  {article.content}
+                </ReactMarkdown>
+              </article>
 
-            {/* Tags */}
-            <div className="mt-12 pt-8 border-t border-border">
-              <p className="font-mono text-xs text-muted-foreground mb-3">
-                Tags
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {article.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="font-mono text-[11px] bg-muted text-muted-foreground px-2.5 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
+              {/* Tags */}
+              <div className="mt-12 pt-8 border-t border-border">
+                <p className="font-mono text-xs text-muted-foreground mb-3">
+                  Tags
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="font-mono text-[11px] bg-muted text-muted-foreground px-2.5 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* CTA */}
-            <div className="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-8">
-              <p className="font-mono text-xs text-primary uppercase tracking-widest mb-3">
-                SpecFlow
-              </p>
-              <h2
-                className="font-serif text-2xl font-bold text-foreground mb-3 leading-snug"
-                style={{ fontFamily: "Merriweather, serif" }}
-              >
-                Générez vos specs en 30 minutes.
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                User stories MoSCoW, critères Gherkin, personas et
-                hors-périmètre — générés automatiquement à partir de votre
-                brief.
-              </p>
-              <Link
-                href="/register"
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                Essayer gratuitement — sans CB
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden="true"
+              {/* CTA */}
+              <div className="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-8">
+                <p className="font-mono text-xs text-primary uppercase tracking-widest mb-3">
+                  SpecFlow
+                </p>
+                <h2
+                  className="font-serif text-2xl font-bold text-foreground mb-3 leading-snug"
+                  style={{ fontFamily: "Merriweather, serif" }}
                 >
-                  <path
-                    d="M3 8h10M9 4l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
-            </div>
+                  Générez vos specs en 30 minutes.
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                  User stories MoSCoW, critères Gherkin, personas et
+                  hors-périmètre — générés automatiquement à partir de votre
+                  brief.
+                </p>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Essayer gratuitement — sans CB
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 8h10M9 4l4 4-4 4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Link>
+              </div>
 
-            {/* Prev / Next navigation */}
-            {(prevArticle || nextArticle) && (
-              <nav
-                className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4"
-                aria-label="Articles précédent et suivant"
-              >
-                {prevArticle ? (
-                  <Link
-                    href={`/blog/${prevArticle.slug}`}
-                    className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-colors"
-                  >
-                    <p className="font-mono text-[10px] text-muted-foreground mb-1">
-                      ← Article précédent
-                    </p>
-                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
-                      {prevArticle.title}
-                    </p>
-                  </Link>
-                ) : (
-                  <div />
-                )}
-                {nextArticle ? (
-                  <Link
-                    href={`/blog/${nextArticle.slug}`}
-                    className="group flex flex-col items-end gap-1 rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-colors text-right"
-                  >
-                    <p className="font-mono text-[10px] text-muted-foreground mb-1">
-                      Article suivant →
-                    </p>
-                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
-                      {nextArticle.title}
-                    </p>
-                  </Link>
-                ) : (
-                  <div />
-                )}
-              </nav>
+              {/* Prev / Next navigation */}
+              {(prevArticle || nextArticle) && (
+                <nav
+                  className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4"
+                  aria-label="Articles précédent et suivant"
+                >
+                  {prevArticle ? (
+                    <Link
+                      href={`/blog/${prevArticle.slug}`}
+                      className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-colors"
+                    >
+                      <p className="font-mono text-[10px] text-muted-foreground mb-1">
+                        ← Article précédent
+                      </p>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+                        {prevArticle.title}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                  {nextArticle ? (
+                    <Link
+                      href={`/blog/${nextArticle.slug}`}
+                      className="group flex flex-col items-end gap-1 rounded-xl border border-border bg-card p-5 hover:border-primary/40 transition-colors text-right"
+                    >
+                      <p className="font-mono text-[10px] text-muted-foreground mb-1">
+                        Article suivant →
+                      </p>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+                        {nextArticle.title}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                </nav>
+              )}
+            </div>
+            {/* end flex-1 */}
+
+            {/* ── SIDEBAR TOC ─────────────────────────────────────────── */}
+            {headings.length > 0 && (
+              <aside className="hidden lg:block w-52 shrink-0 rounded bg-white px-4 py-2">
+                <div className="sticky top-24">
+                  <p className="font-mono text-md uppercase tracking-widest text-muted-foreground mb-3">
+                    Sommaire
+                  </p>
+                  <nav aria-label="Table des matières">
+                    <ul className="space-y-1">
+                      {headings.map((h) => (
+                        <li key={h.id}>
+                          <Link
+                            href={`#${h.id}`}
+                            className="block text-xs hover:text-primary transition-colors leading-snug py-1"
+                          >
+                            {h.text}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              </aside>
             )}
           </div>
         </main>

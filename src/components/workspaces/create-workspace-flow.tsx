@@ -123,7 +123,10 @@ function StepType({
             </p>
             <ul className="space-y-1">
               {bullets.map((b) => (
-                <li key={b} className="text-sm text-muted-foreground flex gap-2">
+                <li
+                  key={b}
+                  className="text-sm text-muted-foreground flex gap-2"
+                >
                   <span className="text-primary">→</span>
                   {b}
                 </li>
@@ -278,7 +281,9 @@ function StepContext({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Spécialités de l&apos;agence</h1>
+          <h1 className="text-2xl font-semibold">
+            Spécialités de l&apos;agence
+          </h1>
           <p className="text-muted-foreground mt-1">
             Quels types de projets traitez-vous le plus souvent ? Ces choix
             pré-rempliront vos templates de génération.
@@ -318,7 +323,9 @@ function StepContext({
           <div className="space-y-1.5">
             <Label htmlFor="tagline">
               Tagline{" "}
-              <span className="text-muted-foreground font-normal">(optionnel)</span>
+              <span className="text-muted-foreground font-normal">
+                (optionnel)
+              </span>
             </Label>
             <Input
               id="tagline"
@@ -380,8 +387,8 @@ function StepContext({
       <div>
         <h1 className="text-2xl font-semibold">Premier client</h1>
         <p className="text-muted-foreground mt-1">
-          Votre workspace est prêt. Vous pourrez configurer vos clients après
-          la création.
+          Votre workspace est prêt. Vous pourrez configurer vos clients après la
+          création.
         </p>
       </div>
       <div className="rounded-xl border border-dashed p-6 text-center text-muted-foreground text-sm">
@@ -412,7 +419,8 @@ export function CreateWorkspaceFlow() {
   const [tagline, setTagline] = useState("");
   const [productDescription, setProductDescription] = useState("");
   const [techStack, setTechStack] = useState("");
-  const [productStage, setProductStage] = useState<WorkspaceProductStage | null>(null);
+  const [productStage, setProductStage] =
+    useState<WorkspaceProductStage | null>(null);
 
   function handleNameChange(v: string) {
     setName(v);
@@ -439,7 +447,7 @@ export function CreateWorkspaceFlow() {
 
     startTransition(async () => {
       try {
-        const workspace = await createWorkspace({
+        await createWorkspace({
           name,
           slug,
           type,
@@ -478,7 +486,13 @@ export function CreateWorkspaceFlow() {
       <StepIndicator current={step} total={3} />
 
       {step === 1 && (
-        <StepType selected={type} onSelect={(t) => { setType(t); setStep(2); }} />
+        <StepType
+          selected={type}
+          onSelect={(t) => {
+            setType(t);
+            setStep(2);
+          }}
+        />
       )}
 
       {step === 2 && type && (
@@ -526,11 +540,7 @@ export function CreateWorkspaceFlow() {
             onClick={handleNext}
             disabled={!canProceed() || isPending}
           >
-            {isPending
-              ? "Création…"
-              : step < 3
-                ? "Continuer"
-                : submitLabel}
+            {isPending ? "Création…" : step < 3 ? "Continuer" : submitLabel}
           </Button>
         </div>
       )}
