@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requireSession } from "@/lib/session";
 import { SpecStatus, WorkspacePlan } from "@/lib/enums";
 
@@ -34,7 +35,7 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
 
   if (member.workspace.plan === WorkspacePlan.FREE) {
     // Vérification et création dans une transaction pour éviter la race condition
-    const spec = await prisma.$transaction(async (tx) => {
+    const spec = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const count = await tx.spec.count({
         where: { workspaceId: parsed.workspaceId },
       });
