@@ -28,6 +28,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Empêche webpack de bundler les packages Node.js côté client
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+
   async headers() {
     return [
       {
