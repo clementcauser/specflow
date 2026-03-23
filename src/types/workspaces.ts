@@ -6,7 +6,7 @@ import {
   WorkspaceRole,
   WorkspacePlan,
   InvitationStatus as PrismaInvitationStatus,
-} from "@prisma/client";
+} from "@/generated/prisma";
 
 export type Role = WorkspaceRole;
 export type Plan = WorkspacePlan;

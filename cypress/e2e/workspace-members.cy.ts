@@ -1,6 +1,6 @@
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-import { Invitation, InvitationStatus } from "@prisma/client";
+import { Invitation, InvitationStatus } from "../../src/generated/prisma";
 
 function uid() {
   return Math.random().toString(36).substring(7);

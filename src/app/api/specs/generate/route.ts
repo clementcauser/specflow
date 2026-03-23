@@ -8,7 +8,7 @@ import {
   SECTIONS_ORDER,
   type SpecSection,
 } from "@/types/spec";
-import { SpecStatus, WorkspaceProductType, WorkspaceType } from "@prisma/client";
+import { SpecStatus, WorkspaceProductType, WorkspaceType } from "@/generated/prisma";
 import {
   WORKSPACE_PRODUCT_TYPE_LABELS,
   WORKSPACE_TYPE_LABELS,

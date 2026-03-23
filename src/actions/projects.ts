@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import { WorkspaceProductType } from "@prisma/client";
+import { WorkspaceProductType } from "@/generated/prisma";
 import { randomUUID } from "crypto";
 
 async function assertMember(userId: string, workspaceId: string) {
