@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { WorkspacePlan, WorkspaceType } from "@prisma/client";
+import { WorkspacePlan, WorkspaceType } from "@/types/workspaces";
 
 function slugify(v: string) {
   return v

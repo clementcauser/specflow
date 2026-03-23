@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Plan } from "@/types/workspaces";
-import { WorkspacePlan } from "@prisma/client";
+import { WorkspacePlan } from "@/types/workspaces";
 
 type Props = {
   workspace: {

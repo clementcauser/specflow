@@ -8,7 +8,7 @@ import { ArrowLeft, Plus, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { WORKSPACE_PRODUCT_TYPE_LABELS } from "@/types/workspaces";
-import { WorkspaceProductType } from "@prisma/client";
+import { WorkspaceProductType } from "@/types/workspaces";
 
 export default async function ClientDetailPage({
   params,

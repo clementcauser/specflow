@@ -7,7 +7,7 @@ import {
   WorkspaceTeamSize,
   WorkspaceProductStage,
   WorkspaceProductType,
-} from "@prisma/client";
+} from "@/types/workspaces";
 import { createWorkspace } from "@/actions/workspaces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

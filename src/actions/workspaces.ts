@@ -14,7 +14,7 @@ import {
   WorkspaceRole,
   WorkspaceTeamSize,
   WorkspaceType,
-} from "@/generated/prisma";
+} from "@/generated/prisma/client";
 
 // ─── Schemas de validation ────────────────────────────────────────────────
 

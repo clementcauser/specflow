@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-import { MoSCoW, EpicStatus } from "@/generated/prisma";
+import { MoSCoW, EpicStatus } from "@/generated/prisma/client";
 import { randomUUID } from "crypto";
 
 async function assertMember(userId: string, workspaceId: string) {
