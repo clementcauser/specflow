@@ -228,9 +228,14 @@ export async function POST(request: NextRequest) {
           ],
         });
 
-        let fullText = "";
+        // Buffer courant : accumule le texte depuis la fin du dernier tag traité
+        let buffer = "";
         let currentSection: SpecSection | null = null;
+        // Contenu de la section courante accumulé depuis son tag d'ouverture
+        let currentSectionContent = "";
         const sections: Partial<Record<SpecSection, string>> = {};
+        // Regex statique (sans flag /g pour un usage simple)
+        const sectionTagRe = /\[SECTION:(\w+)\]/;
 
         for await (const chunk of anthropicStream) {
           if (
@@ -238,44 +243,42 @@ export async function POST(request: NextRequest) {
             chunk.delta.type === "text_delta"
           ) {
             const token = chunk.delta.text;
-            fullText += token;
+            buffer += token;
 
-            const sectionRegex = /\[SECTION:(\w+)\]/g;
-            let match;
-            let lastIndex = 0;
-            const tempText = fullText;
-
-            while ((match = sectionRegex.exec(tempText)) !== null) {
+            // Cherche les tags de section dans le buffer uniquement (O(n) par chunk)
+            let match: RegExpExecArray | null;
+            while ((match = sectionTagRe.exec(buffer)) !== null) {
               const sectionKey = match[1] as SpecSection;
-              if (!SECTIONS_ORDER.includes(sectionKey)) continue;
+
+              // Texte avant le tag → appartient à la section courante
+              const before = buffer.slice(0, match.index);
+              buffer = buffer.slice(match.index + match[0].length);
 
               if (currentSection) {
-                const content = tempText
-                  .slice(lastIndex, match.index)
-                  .replace(/^\n+/, "")
-                  .trimEnd();
+                currentSectionContent += before;
+                const content = currentSectionContent.replace(/^\n+/, "").trimEnd();
                 sections[currentSection] = content;
                 send({ type: "section_done", section: currentSection, content });
               }
 
+              if (!SECTIONS_ORDER.includes(sectionKey)) continue;
+
               currentSection = sectionKey;
-              lastIndex = match.index + match[0].length;
+              currentSectionContent = "";
               send({ type: "section_start", section: sectionKey });
             }
 
             if (currentSection) {
+              // Accumule mais envoie le token brut pour l'affichage temps réel
+              currentSectionContent += token;
               send({ type: "token", section: currentSection, token });
             }
           }
         }
 
-        // Dernière section
-        if (currentSection && fullText) {
-          const lastTagEnd =
-            fullText.lastIndexOf(`[SECTION:${currentSection}]`) +
-            `[SECTION:${currentSection}]`.length;
-          const finalContent = fullText
-            .slice(lastTagEnd)
+        // Dernière section : vide le buffer restant
+        if (currentSection) {
+          const finalContent = (currentSectionContent + buffer)
             .replace(/^\n+/, "")
             .trimEnd();
           sections[currentSection] = finalContent;

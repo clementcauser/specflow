@@ -71,7 +71,15 @@ export async function getEpics(workspaceId: string) {
 export async function getEpic(epicId: string) {
   const session = await requireSession();
 
-  const epic = await prisma.epic.findUniqueOrThrow({
+  // Vérification d'accès avant le chargement complet de la ressource
+  const epicMeta = await prisma.epic.findUnique({
+    where: { id: epicId },
+    select: { workspaceId: true },
+  });
+  if (!epicMeta) throw new Error("Epic introuvable");
+  await assertMember(session.user.id, epicMeta.workspaceId);
+
+  return prisma.epic.findUniqueOrThrow({
     where: { id: epicId },
     include: {
       Spec: {
@@ -87,9 +95,6 @@ export async function getEpic(epicId: string) {
       },
     },
   });
-
-  await assertMember(session.user.id, epic.workspaceId);
-  return epic;
 }
 
 // ─── Update ────────────────────────────────────────────────────────────────

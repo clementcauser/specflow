@@ -127,6 +127,8 @@ model Spec {
   Project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   workspace   Workspace? @relation(fields: [workspaceId], references: [id])
 
+  @@index([workspaceId])
+  @@index([creatorId])
   @@index([epicId])
   @@index([projectId])
 }
