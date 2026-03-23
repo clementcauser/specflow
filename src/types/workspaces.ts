@@ -1,16 +1,72 @@
-import {
-  WorkspaceProductType,
-  WorkspaceType,
-  WorkspaceTeamSize,
-  WorkspaceProductStage,
-  WorkspaceRole,
-  WorkspacePlan,
-  InvitationStatus as PrismaInvitationStatus,
-} from "@prisma/client";
+// Enums définis en TypeScript pur (pas d'import Prisma) pour pouvoir être
+// utilisés dans les Client Components sans bundler du code Node.js.
+
+export const WorkspaceRole = {
+  OWNER: "OWNER",
+  ADMIN: "ADMIN",
+  MEMBER: "MEMBER",
+  VIEWER: "VIEWER",
+} as const;
+export type WorkspaceRole = (typeof WorkspaceRole)[keyof typeof WorkspaceRole];
+
+export const WorkspacePlan = {
+  FREE: "FREE",
+  PRO: "PRO",
+  ENTERPRISE: "ENTERPRISE",
+} as const;
+export type WorkspacePlan = (typeof WorkspacePlan)[keyof typeof WorkspacePlan];
+
+export const WorkspaceType = {
+  AGENCY: "AGENCY",
+  PRODUCT: "PRODUCT",
+  FREELANCE: "FREELANCE",
+} as const;
+export type WorkspaceType = (typeof WorkspaceType)[keyof typeof WorkspaceType];
+
+export const WorkspaceTeamSize = {
+  SOLO: "SOLO",
+  SMALL: "SMALL",
+  MEDIUM: "MEDIUM",
+  LARGE: "LARGE",
+} as const;
+export type WorkspaceTeamSize =
+  (typeof WorkspaceTeamSize)[keyof typeof WorkspaceTeamSize];
+
+export const WorkspaceProductStage = {
+  PRE_MVP: "PRE_MVP",
+  MVP: "MVP",
+  LIVE: "LIVE",
+  MATURE: "MATURE",
+} as const;
+export type WorkspaceProductStage =
+  (typeof WorkspaceProductStage)[keyof typeof WorkspaceProductStage];
+
+export const WorkspaceProductType = {
+  ECOMMERCE: "ECOMMERCE",
+  SAAS: "SAAS",
+  MARKETPLACE: "MARKETPLACE",
+  LANDING_PAGE: "LANDING_PAGE",
+  MOBILE: "MOBILE",
+  DESKTOP: "DESKTOP",
+  API: "API",
+  IOT: "IOT",
+  AI: "AI",
+  OTHER: "OTHER",
+} as const;
+export type WorkspaceProductType =
+  (typeof WorkspaceProductType)[keyof typeof WorkspaceProductType];
+
+export const InvitationStatus = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  REJECTED: "REJECTED",
+  CANCELLED: "CANCELLED",
+} as const;
+export type InvitationStatus =
+  (typeof InvitationStatus)[keyof typeof InvitationStatus];
 
 export type Role = WorkspaceRole;
 export type Plan = WorkspacePlan;
-export type InvitationStatus = PrismaInvitationStatus;
 
 export const ROLE_LABELS: Record<Role, string> = {
   [WorkspaceRole.OWNER]: "Propriétaire",
@@ -56,14 +112,20 @@ export const WORKSPACE_TEAM_SIZE_LABELS: Record<WorkspaceTeamSize, string> = {
   [WorkspaceTeamSize.LARGE]: "20+",
 };
 
-export const WORKSPACE_PRODUCT_STAGE_LABELS: Record<WorkspaceProductStage, string> = {
+export const WORKSPACE_PRODUCT_STAGE_LABELS: Record<
+  WorkspaceProductStage,
+  string
+> = {
   [WorkspaceProductStage.PRE_MVP]: "Idée / pré-MVP",
   [WorkspaceProductStage.MVP]: "MVP en cours",
   [WorkspaceProductStage.LIVE]: "Produit live",
   [WorkspaceProductStage.MATURE]: "Produit mature",
 };
 
-export const WORKSPACE_PRODUCT_TYPE_LABELS: Record<WorkspaceProductType, string> = {
+export const WORKSPACE_PRODUCT_TYPE_LABELS: Record<
+  WorkspaceProductType,
+  string
+> = {
   [WorkspaceProductType.ECOMMERCE]: "E-commerce",
   [WorkspaceProductType.SAAS]: "SaaS / application web",
   [WorkspaceProductType.MARKETPLACE]: "Marketplace",

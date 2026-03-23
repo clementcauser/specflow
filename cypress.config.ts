@@ -1,8 +1,7 @@
 import "dotenv/config";
 import { defineConfig } from "cypress";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./src/generated/prisma";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
 
 export default defineConfig({
   e2e: {
@@ -13,10 +12,7 @@ export default defineConfig({
     viewportHeight: 720,
     setupNodeEvents(on) {
       const prisma = new PrismaClient({
-        adapter: new PrismaPg(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          new Pool({ connectionString: process.env.DATABASE_URL }) as any,
-        ),
+        adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
       });
 
       on("task", {

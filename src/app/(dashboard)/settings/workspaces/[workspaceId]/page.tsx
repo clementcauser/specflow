@@ -7,7 +7,7 @@ import { WorkspaceSettingsForm } from "@/components/workspaces/workspace-setting
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requireSession } from "@/lib/session";
 import { Role } from "@/types/workspaces";
-import { WorkspaceRole } from "@prisma/client";
+import { WorkspaceRole } from "@/types/workspaces";
 
 export default async function WorkspaceDetailPage({
   params,

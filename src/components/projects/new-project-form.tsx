@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { WORKSPACE_PRODUCT_TYPE_LABELS } from "@/types/workspaces";
-import { WorkspaceProductType } from "@prisma/client";
+import { WorkspaceProductType } from "@/types/workspaces";
 
 type Props = {
   workspaceId: string;
