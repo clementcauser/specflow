@@ -20,11 +20,13 @@ export default async function DashboardLayout({
   const activeWorkspaceId =
     user.activeWorkspaceId ?? user.memberships[0].workspace.id;
 
+  type Membership = (typeof user.memberships)[number];
+
   const activeWorkspace =
-    user.memberships.find((m) => m.workspace.id === activeWorkspaceId)
+    user.memberships.find((m: Membership) => m.workspace.id === activeWorkspaceId)
       ?.workspace ?? user.memberships[0].workspace;
 
-  const workspaces = user.memberships.map((m) => m.workspace);
+  const workspaces = user.memberships.map((m: Membership) => m.workspace);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
