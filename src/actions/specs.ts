@@ -5,6 +5,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
+const FREE_PLAN_LIMIT = 3;
+
 const createSpecSchema = z.object({
   title: z.string().min(2).max(100),
   prompt: z.string().min(20, "Décrivez le projet en au moins 20 caractères"),
@@ -25,8 +27,20 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
         workspaceId: parsed.workspaceId,
       },
     },
+    include: { workspace: { select: { plan: true } } },
   });
   if (!member) throw new Error("Accès refusé");
+
+  if (member.workspace.plan === "FREE") {
+    const count = await prisma.spec.count({
+      where: { workspaceId: parsed.workspaceId },
+    });
+    if (count >= FREE_PLAN_LIMIT) {
+      throw new Error(
+        "Limite du plan gratuit atteinte. Passez au plan Pro pour continuer.",
+      );
+    }
+  }
 
   const spec = await prisma.spec.create({
     data: {
@@ -131,6 +145,37 @@ export async function getMonthlySpecsCount(workspaceId: string) {
       createdAt: { gte: startOfMonth },
     },
   });
+}
+
+export async function getWorkspacePlanInfo(workspaceId: string) {
+  const session = await requireSession();
+
+  const member = await prisma.member.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId: session.user.id,
+        workspaceId,
+      },
+    },
+    include: { workspace: { select: { plan: true } } },
+  });
+
+  if (!member) throw new Error("Accès refusé");
+
+  const plan = member.workspace.plan;
+
+  if (plan !== "FREE") {
+    return { plan, specsCount: 0, limit: null, isAtLimit: false };
+  }
+
+  const specsCount = await prisma.spec.count({ where: { workspaceId } });
+
+  return {
+    plan,
+    specsCount,
+    limit: FREE_PLAN_LIMIT,
+    isAtLimit: specsCount >= FREE_PLAN_LIMIT,
+  };
 }
 
 const updateSpecSchema = z.object({
