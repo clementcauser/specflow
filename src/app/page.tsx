@@ -169,6 +169,12 @@ export default function LandingPage() {
               Tarifs
             </a>
             <Link
+              href="/blog"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Blog
+            </Link>
+            <Link
               href="/login"
               className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
