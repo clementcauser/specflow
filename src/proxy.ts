@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const MAINTENANCE_PATH = "/maintenance";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isUnderConstruction =
     process.env.IS_UNDER_CONSTRUCTION === "true";
 
