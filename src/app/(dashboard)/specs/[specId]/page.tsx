@@ -6,6 +6,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getSpec } from "@/actions/specs";
+import { ExportMenu } from "@/components/specs/export-menu";
 
 export default async function SpecPage({
   params,
@@ -25,12 +26,15 @@ export default async function SpecPage({
             Mes specs
           </Link>
         </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/specs/${specId}/edit`}>
-            <Pencil className="h-4 w-4 mr-2" />
-            Modifier
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportMenu specId={specId} />
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/specs/${specId}/edit`}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Modifier
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-1">
