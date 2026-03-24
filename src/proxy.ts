@@ -1,44 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// Prefixes : toute route commençant par ces valeurs est publique
-const PUBLIC_PREFIXES = [
-  "/blog",
-  "/sign-in",
-  "/sign-up",
-  "/verify-email",
-  "/reset-password",
-  "/invite",
-  "/onboarding",
-];
-// Correspondances exactes publiques
-const PUBLIC_EXACT = ["/"];
-const AUTH_ROUTES = ["/sign-in", "/sign-up"];
+const MAINTENANCE_PATH = "/maintenance";
 
-export async function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
+  const isUnderConstruction =
+    process.env.IS_UNDER_CONSTRUCTION === "true";
+
   const { pathname } = request.nextUrl;
-  const sessionCookie = getSessionCookie(request);
-  const isAuthenticated = !!sessionCookie;
 
-  if (isAuthenticated && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (isUnderConstruction) {
+    // Already on the maintenance page — let through
+    if (pathname === MAINTENANCE_PATH) {
+      return NextResponse.next();
+    }
+    // Redirect everything else to /maintenance
+    return NextResponse.redirect(new URL(MAINTENANCE_PATH, request.url));
   }
 
-  const isPublic =
-    PUBLIC_EXACT.includes(pathname) ||
-    PUBLIC_PREFIXES.some((r) => pathname.startsWith(r));
-  if (!isPublic && !isAuthenticated && !pathname.startsWith("/api")) {
-    const url = new URL("/sign-in", request.url);
-    // N'accepte que les chemins internes (commence par /) pour éviter les open redirects
-    if (pathname.startsWith("/") && !pathname.startsWith("//")) {
-      url.searchParams.set("callbackUrl", pathname);
-    }
-    return NextResponse.redirect(url);
+  // Site is live — block direct access to /maintenance
+  if (pathname === MAINTENANCE_PATH) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/auth).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static  (static files)
+     * - _next/image   (image optimisation)
+     * - favicon.ico
+     * - api routes
+     */
+    "/((?!_next/static|_next/image|favicon.ico|api/).*)",
+  ],
 };
