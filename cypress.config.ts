@@ -206,6 +206,46 @@ export default defineConfig({
             .catch(() => {});
           return null;
         },
+
+        // ─── Specs ────────────────────────────────────────────────────────
+
+        async seedSpec({
+          workspaceSlug,
+          ownerEmail,
+          title,
+          prompt,
+          content,
+        }: {
+          workspaceSlug: string;
+          ownerEmail: string;
+          title: string;
+          prompt?: string;
+          content?: Record<string, string>;
+        }) {
+          const [workspace, user] = await Promise.all([
+            prisma.workspace.findUnique({ where: { slug: workspaceSlug } }),
+            prisma.user.findUnique({ where: { email: ownerEmail } }),
+          ]);
+          if (!workspace) throw new Error(`Workspace ${workspaceSlug} introuvable`);
+          if (!user) throw new Error(`Utilisateur ${ownerEmail} introuvable`);
+
+          const spec = await prisma.spec.create({
+            data: {
+              title,
+              prompt: prompt ?? null,
+              workspaceId: workspace.id,
+              creatorId: user.id,
+              status: "DONE",
+              content: content ?? {},
+            },
+          });
+          return spec.id;
+        },
+
+        async deleteSpec(specId: string) {
+          await prisma.spec.delete({ where: { id: specId } }).catch(() => {});
+          return null;
+        },
       });
     },
   },
