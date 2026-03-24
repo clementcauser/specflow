@@ -5,6 +5,8 @@ import { LogoutButton } from "@/components/settings/logout-button";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { SecuritySection } from "@/components/settings/security-section";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { Plug, ChevronRight } from "lucide-react";
 
 export default async function SettingsPage() {
   const session = await requireSession();
@@ -31,6 +33,22 @@ export default async function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Link
+        href="/settings/integrations"
+        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <Plug className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Intégrations</p>
+            <p className="text-xs text-muted-foreground">
+              Connectez Notion et d&apos;autres outils pour enrichir vos exports.
+            </p>
+          </div>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Link>
     </div>
   );
 }

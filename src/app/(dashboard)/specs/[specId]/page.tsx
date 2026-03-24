@@ -27,7 +27,7 @@ export default async function SpecPage({
           </Link>
         </Button>
         <div className="flex items-center gap-2">
-          <ExportMenu specId={specId} />
+          <ExportMenu specId={specId} specTitle={spec.title} />
           <Button variant="outline" size="sm" asChild>
             <Link href={`/specs/${specId}/edit`}>
               <Pencil className="h-4 w-4 mr-2" />
