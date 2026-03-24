@@ -42,6 +42,16 @@ declare global {
         workspaceSlug: string;
         email: string;
       }): null;
+
+      // Specs
+      seedSpec(params: {
+        workspaceSlug: string;
+        ownerEmail: string;
+        title: string;
+        prompt?: string;
+        content?: Record<string, string>;
+      }): string;
+      deleteSpec(specId: string): null;
     }
   }
 }
