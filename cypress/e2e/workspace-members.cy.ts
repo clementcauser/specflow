@@ -1,6 +1,5 @@
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-import { Invitation, InvitationStatus } from "../../src/generated/prisma";
 
 function uid() {
   return Math.random().toString(36).substring(7);
@@ -158,9 +157,7 @@ describe("Gestion des membres d'un workspace", () => {
         workspaceSlug,
         email: memberEmail,
       }).then((invitation) => {
-        expect((invitation as Invitation).status).to.eq(
-          InvitationStatus.CANCELLED,
-        );
+        expect((invitation as { status: string }).status).to.eq("CANCELLED");
       });
     });
 

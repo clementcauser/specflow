@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: COLORS.white,
     fontFamily: "Helvetica",
-    paddingTop: 0,
+    paddingTop: 40,
     paddingBottom: 48,
     paddingHorizontal: 0,
   },
@@ -319,7 +319,7 @@ function SpecPDF({
     >
       <Page size="A4" style={styles.page}>
         {/* ── Header ── */}
-        <View style={styles.header} fixed>
+        <View style={styles.header}>
           <Text style={styles.headerLabel}>Spécification fonctionnelle</Text>
           <Text style={styles.headerTitle}>{title}</Text>
           <Text style={styles.headerMeta}>Généré le {date} · SpecFlow</Text>
@@ -333,8 +333,8 @@ function SpecPDF({
           {availableSections.map((section) => {
             const sectionContent = content[section]!;
             return (
-              <View key={section} style={styles.section} wrap={false}>
-                <View style={styles.sectionHeader}>
+              <View key={section} style={styles.section}>
+                <View style={styles.sectionHeader} wrap={false}>
                   <View style={styles.sectionDot} />
                   <Text style={styles.sectionTitle}>{SECTION_LABELS[section]}</Text>
                 </View>

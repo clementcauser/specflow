@@ -65,7 +65,47 @@ export default async function SpecPage({
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown>{sectionContent}</ReactMarkdown>
+                  {section === "personas" || section === "acceptance" ? (
+                    <ReactMarkdown
+                      components={{
+                        h2: ({ children }) => (
+                          <p className="font-bold text-foreground not-prose mt-6 first:mt-0">
+                            {children}
+                          </p>
+                        ),
+                        h3: ({ children }) => (
+                          <p className="font-bold text-foreground not-prose mt-6 first:mt-0">
+                            {children}
+                          </p>
+                        ),
+                        hr: () => (
+                          <div className="my-6 border-t border-border" />
+                        ),
+                      }}
+                    >
+                      {sectionContent}
+                    </ReactMarkdown>
+                  ) : section === "userStories" ? (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ node, children }) => {
+                          const isMoscowHeading =
+                            node?.children?.length === 1 &&
+                            node.children[0].type === "element" &&
+                            (node.children[0] as { tagName?: string }).tagName === "strong";
+                          return (
+                            <p className={isMoscowHeading ? "font-bold mt-6 first:mt-0" : undefined}>
+                              {children}
+                            </p>
+                          );
+                        },
+                      }}
+                    >
+                      {sectionContent}
+                    </ReactMarkdown>
+                  ) : (
+                    <ReactMarkdown>{sectionContent}</ReactMarkdown>
+                  )}
                 </div>
               </CardContent>
             </Card>

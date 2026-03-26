@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, memo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   SECTIONS_CONFIG,
@@ -9,16 +9,15 @@ import {
   type SpecSection,
   type SpecContent,
 } from "@/types/spec";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
 import {
   CheckCircle,
   Circle,
   Loader2,
   AlertCircle,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 type Props = {
@@ -39,18 +38,17 @@ type SseEvent =
   | { type: "done" }
   | { type: "error"; message: string };
 
-const MemoizedMarkdown = memo(function MemoizedMarkdown({
-  content,
-}: {
-  content: string;
-}) {
-  return <ReactMarkdown>{content}</ReactMarkdown>;
-});
+const LOADING_MESSAGES = [
+  "SpecFlow analyse votre demande…",
+  "Rédaction des user stories en cours…",
+  "On s'occupe de tout, ça arrive bientôt…",
+  "Chaque section est rédigée avec soin…",
+  "Votre spec prend forme…",
+];
 
 export function SpecGenerator({ spec }: Props) {
   const router = useRouter();
 
-  // Derive active sections from stored _sections; fallback to all
   const storedSections = Array.isArray(spec.content?.["_sections"])
     ? (spec.content["_sections"] as SpecSection[])
     : null;
@@ -68,23 +66,20 @@ export function SpecGenerator({ spec }: Props) {
       SectionState
     >,
   );
-  const [content, setContent] = useState<SpecContent>({});
-  const [activeSection, setActiveSection] = useState<SpecSection | null>(null);
+  const [, setContent] = useState<SpecContent>({});
   const [globalStatus, setGlobalStatus] = useState<
     "idle" | "generating" | "done" | "error"
   >("idle");
   const [error, setError] = useState("");
-  const activeSectionRef = useRef<HTMLDivElement>(null);
+  const [messageIndex, setMessageIndex] = useState(0);
 
-  // Scroll vers la section active
   useEffect(() => {
-    if (activeSectionRef.current) {
-      activeSectionRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }, [activeSection]);
+    if (globalStatus !== "generating") return;
+    const interval = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [globalStatus]);
 
   const startGeneration = useCallback(async () => {
     setGlobalStatus("generating");
@@ -131,7 +126,6 @@ export function SpecGenerator({ spec }: Props) {
   function handleEvent(event: SseEvent) {
     switch (event.type) {
       case "section_start":
-        setActiveSection(event.section);
         setSectionStates((prev) => ({
           ...prev,
           [event.section]: "generating",
@@ -153,7 +147,6 @@ export function SpecGenerator({ spec }: Props) {
 
       case "done":
         setGlobalStatus("done");
-        setActiveSection(null);
         break;
 
       case "error":
@@ -189,13 +182,12 @@ export function SpecGenerator({ spec }: Props) {
           <h1 className="text-xl font-semibold">{spec.title}</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          {globalStatus === "generating" && "Génération en cours…"}
           {globalStatus === "done" && "Spec générée avec succès."}
           {globalStatus === "error" && error}
         </p>
       </div>
 
-      {/* Progression */}
+      {/* Pastilles de progression */}
       <div className="flex gap-3 flex-wrap">
         {activeSections.map((section) => (
           <div
@@ -215,52 +207,26 @@ export function SpecGenerator({ spec }: Props) {
         ))}
       </div>
 
-      {/* Sections */}
-      <div className="space-y-4">
-        {activeSections.map((section) => {
-          const state = sectionStates[section];
-          const sectionContent = content[section];
-          const isActive = activeSection === section;
-
-          if (state === "pending") return null;
-
-          return (
-            <div key={section} ref={isActive ? activeSectionRef : null}>
-              <Card
-                className={cn(
-                  "transition-all",
-                  isActive && "border-primary/50 shadow-sm",
-                )}
-              >
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    {sectionIcon(section)}
-                    {SECTION_LABELS[section]}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {sectionContent ? (
-                    <div
-                      className={cn(
-                        "prose prose-sm dark:prose-invert max-w-none",
-                        isActive &&
-                          "after:content-['▋'] after:animate-pulse after:text-primary",
-                      )}
-                    >
-                      <MemoizedMarkdown content={sectionContent} />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Génération…
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+      {/* Loader central */}
+      {globalStatus === "generating" && (
+        <div className="flex flex-col items-center justify-center gap-6 py-20">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-full border-4 border-primary/20" />
+            <div className="absolute inset-0 h-16 w-16 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-primary" />
             </div>
-          );
-        })}
-      </div>
+          </div>
+          <div className="text-center space-y-1.5">
+            <p className="text-base font-medium text-foreground transition-all duration-500">
+              {LOADING_MESSAGES[messageIndex]}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Cette opération peut prendre quelques secondes.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* CTA final */}
       {globalStatus === "done" && (

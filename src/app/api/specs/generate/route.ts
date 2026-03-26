@@ -268,11 +268,8 @@ export async function POST(request: NextRequest) {
               send({ type: "section_start", section: sectionKey });
             }
 
-            if (currentSection) {
-              // Accumule mais envoie le token brut pour l'affichage temps réel
-              currentSectionContent += token;
-              send({ type: "token", section: currentSection, token });
-            }
+            // Le buffer accumule le contenu de la section courante.
+            // Les tokens ne sont plus envoyés au client (loader à la place du streaming).
           }
         }
 

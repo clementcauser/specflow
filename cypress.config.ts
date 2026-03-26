@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { defineConfig } from "cypress";
-import { PrismaClient } from "./src/generated/prisma";
+import { PrismaClient } from "./src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 export default defineConfig({
@@ -32,6 +32,10 @@ export default defineConfig({
             include: { memberships: true },
           });
           if (user) {
+            // Supprimer les specs d'abord : creatorId est une FK required (Restrict par défaut)
+            await prisma.spec
+              .deleteMany({ where: { creatorId: user.id } })
+              .catch(() => {});
             for (const membership of user.memberships) {
               await prisma.workspace
                 .delete({ where: { id: membership.workspaceId } })
@@ -86,9 +90,7 @@ export default defineConfig({
         },
 
         async deleteWorkspace(slug: string) {
-          await prisma.workspace
-            .delete({ where: { slug } })
-            .catch(() => {});
+          await prisma.workspace.delete({ where: { slug } }).catch(() => {});
           return null;
         },
 
@@ -107,7 +109,8 @@ export default defineConfig({
             prisma.workspace.findUnique({ where: { slug: workspaceSlug } }),
             prisma.user.findUnique({ where: { email: memberEmail } }),
           ]);
-          if (!workspace) throw new Error(`Workspace ${workspaceSlug} introuvable`);
+          if (!workspace)
+            throw new Error(`Workspace ${workspaceSlug} introuvable`);
           if (!user) throw new Error(`Utilisateur ${memberEmail} introuvable`);
 
           await prisma.member.upsert({
@@ -179,7 +182,9 @@ export default defineConfig({
               },
             },
           });
-          return invitation ? { id: invitation.id, status: invitation.status } : null;
+          return invitation
+            ? { id: invitation.id, status: invitation.status }
+            : null;
         },
 
         async deleteInvitation({
@@ -226,7 +231,8 @@ export default defineConfig({
             prisma.workspace.findUnique({ where: { slug: workspaceSlug } }),
             prisma.user.findUnique({ where: { email: ownerEmail } }),
           ]);
-          if (!workspace) throw new Error(`Workspace ${workspaceSlug} introuvable`);
+          if (!workspace)
+            throw new Error(`Workspace ${workspaceSlug} introuvable`);
           if (!user) throw new Error(`Utilisateur ${ownerEmail} introuvable`);
 
           const spec = await prisma.spec.create({
