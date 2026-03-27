@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { NotionConnect } from "@/components/integrations/notion-connect";
+import { GitIntegrationCard } from "@/components/integrations/GitIntegrationCard";
 
 export default async function IntegrationsPage() {
   const session = await requireSession();
@@ -14,8 +15,7 @@ export default async function IntegrationsPage() {
 
   const workspaceId = user.activeWorkspaceId;
 
-  // Fetch integration status + member role in one go
-  const [integration, member] = workspaceId
+  const [notionIntegration, member, gitIntegrations] = workspaceId
     ? await Promise.all([
         prisma.notionIntegration.findUnique({
           where: { workspaceId },
@@ -29,10 +29,25 @@ export default async function IntegrationsPage() {
           where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
           select: { role: true },
         }),
+        prisma.gitIntegration.findMany({
+          where: { workspaceId },
+          select: {
+            provider: true,
+            providerAccountName: true,
+            defaultRepoOwner: true,
+            defaultRepoName: true,
+            createdAt: true,
+          },
+        }),
       ])
-    : [null, null];
+    : [null, null, []];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
+
+  const githubIntegration = gitIntegrations.find((g) => g.provider === "GITHUB");
+  const gitlabIntegration = gitIntegrations.find((g) => g.provider === "GITLAB");
+
+  const showGitLab = !!process.env.GITLAB_CLIENT_ID;
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -43,6 +58,7 @@ export default async function IntegrationsPage() {
         </p>
       </div>
 
+      {/* Documentation tools */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Outils d&apos;export</CardTitle>
@@ -54,12 +70,58 @@ export default async function IntegrationsPage() {
           {workspaceId ? (
             <NotionConnect
               workspaceId={workspaceId}
-              connected={!!integration}
-              notionWorkspaceName={integration?.notionWorkspaceName}
-              notionWorkspaceIcon={integration?.notionWorkspaceIcon}
-              connectedAt={integration?.createdAt}
+              connected={!!notionIntegration}
+              notionWorkspaceName={notionIntegration?.notionWorkspaceName}
+              notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
+              connectedAt={notionIntegration?.createdAt}
               canManage={canManage}
             />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Aucun espace de travail actif.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Git integrations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Gestion de projet</CardTitle>
+          <CardDescription>
+            Exportez vos user stories directement en issues GitHub ou GitLab.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {workspaceId ? (
+            <>
+              <GitIntegrationCard
+                workspaceId={workspaceId}
+                provider="GITHUB"
+                connected={!!githubIntegration}
+                accountName={githubIntegration?.providerAccountName}
+                defaultRepoOwner={githubIntegration?.defaultRepoOwner}
+                defaultRepoName={githubIntegration?.defaultRepoName}
+                connectedAt={githubIntegration?.createdAt}
+                canManage={canManage}
+              />
+
+              {showGitLab && (
+                <>
+                  <Separator />
+                  <GitIntegrationCard
+                    workspaceId={workspaceId}
+                    provider="GITLAB"
+                    connected={!!gitlabIntegration}
+                    accountName={gitlabIntegration?.providerAccountName}
+                    defaultRepoOwner={gitlabIntegration?.defaultRepoOwner}
+                    defaultRepoName={gitlabIntegration?.defaultRepoName}
+                    connectedAt={gitlabIntegration?.createdAt}
+                    canManage={canManage}
+                  />
+                </>
+              )}
+            </>
           ) : (
             <p className="text-sm text-muted-foreground">
               Aucun espace de travail actif.

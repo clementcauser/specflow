@@ -7,6 +7,9 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getSpec } from "@/actions/specs";
 import { ExportMenu } from "@/components/specs/export-menu";
+import { GitExportButton } from "@/components/integrations/GitExportButton";
+import { prisma } from "@/lib/prisma";
+import { requireSession } from "@/lib/session";
 
 export default async function SpecPage({
   params,
@@ -14,8 +17,33 @@ export default async function SpecPage({
   params: Promise<{ specId: string }>;
 }) {
   const { specId } = await params;
-  const spec = await getSpec(specId);
+  const [spec, session] = await Promise.all([getSpec(specId), requireSession()]);
   const content = (spec.content ?? {}) as SpecContent;
+
+  // Fetch connected git integrations for the active workspace
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { activeWorkspaceId: true },
+  });
+
+  const gitIntegrations = user?.activeWorkspaceId
+    ? await prisma.gitIntegration.findMany({
+        where: { workspaceId: user.activeWorkspaceId },
+        select: {
+          provider: true,
+          providerAccountName: true,
+          defaultRepoOwner: true,
+          defaultRepoName: true,
+        },
+      })
+    : [];
+
+  const connectedProviders = gitIntegrations.map((g) => ({
+    provider: g.provider as "GITHUB" | "GITLAB",
+    accountName: g.providerAccountName,
+    defaultRepoOwner: g.defaultRepoOwner,
+    defaultRepoName: g.defaultRepoName,
+  }));
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
@@ -28,6 +56,9 @@ export default async function SpecPage({
         </Button>
         <div className="flex items-center gap-2">
           <ExportMenu specId={specId} specTitle={spec.title} />
+          {connectedProviders.length > 0 && content.userStories && (
+            <GitExportButton specId={specId} connectedProviders={connectedProviders} />
+          )}
           <Button variant="outline" size="sm" asChild>
             <Link href={`/specs/${specId}/edit`}>
               <Pencil className="h-4 w-4 mr-2" />

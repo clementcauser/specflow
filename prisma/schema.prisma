@@ -84,6 +84,7 @@ model Workspace {
   Project            Project[]
   specs              Spec[]
   notionIntegration  NotionIntegration?
+  gitIntegrations    GitIntegration[]
 }
 
 model NotionIntegration {
@@ -96,6 +97,23 @@ model NotionIntegration {
   notionWorkspaceIcon String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+}
+
+model GitIntegration {
+  id                  String      @id @default(cuid())
+  workspaceId         String
+  workspace           Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider            GitProvider
+  accessToken         String
+  refreshToken        String?
+  providerAccountId   String
+  providerAccountName String
+  defaultRepoOwner    String?
+  defaultRepoName     String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@unique([workspaceId, provider])
 }
 
 model Member {
@@ -239,6 +257,11 @@ enum MoSCoW {
   SHOULD
   COULD
   WONT
+}
+
+enum GitProvider {
+  GITHUB
+  GITLAB
 }
 
 enum WorkspaceType {
