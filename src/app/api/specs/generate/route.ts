@@ -15,6 +15,7 @@ import {
   WORKSPACE_TEAM_SIZE_LABELS,
   WORKSPACE_PRODUCT_STAGE_LABELS,
 } from "@/types/workspaces";
+import { sendSpecNotification } from "@/lib/slack";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -286,6 +287,14 @@ export async function POST(request: NextRequest) {
           where: { id: specId },
           data: { content: sections, status: SpecStatus.DONE },
         });
+
+        if (spec.workspaceId) {
+          void sendSpecNotification(spec.workspaceId, {
+            specTitle: spec.title,
+            projectName: spec.Project?.name ?? spec.Epic?.title ?? spec.title,
+            specUrl: `${process.env.NEXT_PUBLIC_APP_URL}/specs/${specId}`,
+          });
+        }
 
         send({ type: "done" });
       } catch {

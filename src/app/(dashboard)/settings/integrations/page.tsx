@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { NotionConnect } from "@/components/integrations/notion-connect";
+import { SlackIntegrationCard } from "@/components/integrations/SlackIntegrationCard";
 
 export default async function IntegrationsPage() {
   const session = await requireSession();
@@ -15,7 +16,7 @@ export default async function IntegrationsPage() {
   const workspaceId = user.activeWorkspaceId;
 
   // Fetch integration status + member role in one go
-  const [integration, member] = workspaceId
+  const [notionIntegration, slackIntegration, member] = workspaceId
     ? await Promise.all([
         prisma.notionIntegration.findUnique({
           where: { workspaceId },
@@ -25,12 +26,21 @@ export default async function IntegrationsPage() {
             createdAt: true,
           },
         }),
+        prisma.slackIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            teamSlackName: true,
+            defaultChannelId: true,
+            defaultChannelName: true,
+            createdAt: true,
+          },
+        }),
         prisma.member.findUnique({
           where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
           select: { role: true },
         }),
       ])
-    : [null, null];
+    : [null, null, null];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
 
@@ -52,14 +62,26 @@ export default async function IntegrationsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {workspaceId ? (
-            <NotionConnect
-              workspaceId={workspaceId}
-              connected={!!integration}
-              notionWorkspaceName={integration?.notionWorkspaceName}
-              notionWorkspaceIcon={integration?.notionWorkspaceIcon}
-              connectedAt={integration?.createdAt}
-              canManage={canManage}
-            />
+            <>
+              <NotionConnect
+                workspaceId={workspaceId}
+                connected={!!notionIntegration}
+                notionWorkspaceName={notionIntegration?.notionWorkspaceName}
+                notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
+                connectedAt={notionIntegration?.createdAt}
+                canManage={canManage}
+              />
+              <Separator />
+              <SlackIntegrationCard
+                workspaceId={workspaceId}
+                connected={!!slackIntegration}
+                teamSlackName={slackIntegration?.teamSlackName}
+                defaultChannelId={slackIntegration?.defaultChannelId}
+                defaultChannelName={slackIntegration?.defaultChannelName}
+                connectedAt={slackIntegration?.createdAt}
+                canManage={canManage}
+              />
+            </>
           ) : (
             <p className="text-sm text-muted-foreground">
               Aucun espace de travail actif.

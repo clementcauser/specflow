@@ -6,6 +6,7 @@ import { createNotionPage } from "@/lib/notion";
 import { specToNotionBlocks } from "@/lib/spec-to-notion";
 import type { SpecContent } from "@/types/spec";
 import { z } from "zod/v4";
+import { sendSpecNotification } from "@/lib/slack";
 
 export const runtime = "nodejs";
 
@@ -78,6 +79,13 @@ export async function POST(
       spec.title,
       blocks
     );
+
+    void sendSpecNotification(spec.workspaceId, {
+      specTitle: spec.title,
+      projectName: spec.title,
+      specUrl: `${process.env.NEXT_PUBLIC_APP_URL}/specs/${specId}`,
+      exportType: "Notion",
+    });
 
     return Response.json({ url: page.url, pageId: page.id });
   } catch (err) {

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { SECTIONS_ORDER, SECTION_LABELS, type SpecContent } from "@/types/spec";
+import { sendSpecNotification } from "@/lib/slack";
 
 export const runtime = "nodejs";
 
@@ -66,6 +67,13 @@ export async function GET(
 
   const markdown = lines.join("\n");
   const filename = `spec-${spec.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}.md`;
+
+  void sendSpecNotification(spec.workspaceId, {
+    specTitle: spec.title,
+    projectName: spec.title,
+    specUrl: `${process.env.NEXT_PUBLIC_APP_URL}/specs/${specId}`,
+    exportType: "Markdown",
+  });
 
   return new Response(markdown, {
     headers: {

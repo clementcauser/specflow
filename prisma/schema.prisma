@@ -84,6 +84,7 @@ model Workspace {
   Project            Project[]
   specs              Spec[]
   notionIntegration  NotionIntegration?
+  slackIntegration   SlackIntegration?
 }
 
 model NotionIntegration {
@@ -96,6 +97,20 @@ model NotionIntegration {
   notionWorkspaceIcon String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+}
+
+model SlackIntegration {
+  id                 String    @id @default(cuid())
+  workspaceId        String    @unique
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  accessToken        String
+  botUserId          String?
+  teamSlackId        String?
+  teamSlackName      String?
+  defaultChannelId   String?
+  defaultChannelName String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Member {
