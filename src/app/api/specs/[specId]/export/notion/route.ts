@@ -82,6 +82,7 @@ export async function POST(
     return Response.json({ url: page.url, pageId: page.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[Notion export error]", message);
 
     if (message.includes("401") || message.includes("unauthorized")) {
       return Response.json({ error: "notion_unauthorized" }, { status: 401 });
