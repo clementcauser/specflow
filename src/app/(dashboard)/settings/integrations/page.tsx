@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { NotionConnect } from "@/components/integrations/notion-connect";
 import { GitIntegrationCard } from "@/components/integrations/GitIntegrationCard";
+import { TrelloIntegrationCard } from "@/components/integrations/TrelloIntegrationCard";
+import { ClickUpIntegrationCard } from "@/components/integrations/ClickUpIntegrationCard";
 
 export default async function IntegrationsPage() {
   const session = await requireSession();
@@ -15,32 +17,56 @@ export default async function IntegrationsPage() {
 
   const workspaceId = user.activeWorkspaceId;
 
-  const [notionIntegration, member, gitIntegrations] = workspaceId
-    ? await Promise.all([
-        prisma.notionIntegration.findUnique({
-          where: { workspaceId },
-          select: {
-            notionWorkspaceName: true,
-            notionWorkspaceIcon: true,
-            createdAt: true,
-          },
-        }),
-        prisma.member.findUnique({
-          where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
-          select: { role: true },
-        }),
-        prisma.gitIntegration.findMany({
-          where: { workspaceId },
-          select: {
-            provider: true,
-            providerAccountName: true,
-            defaultRepoOwner: true,
-            defaultRepoName: true,
-            createdAt: true,
-          },
-        }),
-      ])
-    : [null, null, []];
+  const [notionIntegration, member, gitIntegrations, trelloIntegration, clickupIntegration] =
+    workspaceId
+      ? await Promise.all([
+          prisma.notionIntegration.findUnique({
+            where: { workspaceId },
+            select: {
+              notionWorkspaceName: true,
+              notionWorkspaceIcon: true,
+              createdAt: true,
+            },
+          }),
+          prisma.member.findUnique({
+            where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
+            select: { role: true },
+          }),
+          prisma.gitIntegration.findMany({
+            where: { workspaceId },
+            select: {
+              provider: true,
+              providerAccountName: true,
+              defaultRepoOwner: true,
+              defaultRepoName: true,
+              createdAt: true,
+            },
+          }),
+          prisma.trelloIntegration.findUnique({
+            where: { workspaceId },
+            select: {
+              trelloUsername: true,
+              trelloFullName: true,
+              defaultBoardId: true,
+              defaultBoardName: true,
+              defaultListId: true,
+              defaultListName: true,
+              createdAt: true,
+            },
+          }),
+          prisma.clickUpIntegration.findUnique({
+            where: { workspaceId },
+            select: {
+              clickupUserName: true,
+              clickupWorkspaceName: true,
+              defaultSpaceId: true,
+              defaultListId: true,
+              defaultListName: true,
+              createdAt: true,
+            },
+          }),
+        ])
+      : [null, null, [], null, null];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
 
@@ -121,6 +147,50 @@ export default async function IntegrationsPage() {
                   />
                 </>
               )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Aucun espace de travail actif.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Task management integrations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Gestion des tâches</CardTitle>
+          <CardDescription>
+            Exportez vos user stories en cartes ou tâches dans vos outils de gestion.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {workspaceId ? (
+            <>
+              <TrelloIntegrationCard
+                workspaceId={workspaceId}
+                connected={!!trelloIntegration}
+                username={trelloIntegration?.trelloUsername}
+                fullName={trelloIntegration?.trelloFullName}
+                defaultBoardId={trelloIntegration?.defaultBoardId}
+                defaultBoardName={trelloIntegration?.defaultBoardName}
+                defaultListId={trelloIntegration?.defaultListId}
+                defaultListName={trelloIntegration?.defaultListName}
+                connectedAt={trelloIntegration?.createdAt}
+                canManage={canManage}
+              />
+              <Separator />
+              <ClickUpIntegrationCard
+                workspaceId={workspaceId}
+                connected={!!clickupIntegration}
+                clickupUserName={clickupIntegration?.clickupUserName}
+                clickupWorkspaceName={clickupIntegration?.clickupWorkspaceName}
+                defaultSpaceId={clickupIntegration?.defaultSpaceId}
+                defaultListId={clickupIntegration?.defaultListId}
+                defaultListName={clickupIntegration?.defaultListName}
+                connectedAt={clickupIntegration?.createdAt}
+                canManage={canManage}
+              />
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
