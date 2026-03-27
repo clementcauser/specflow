@@ -85,6 +85,7 @@ model Workspace {
   specs              Spec[]
   notionIntegration  NotionIntegration?
   gitIntegrations    GitIntegration[]
+  trelloIntegration  TrelloIntegration?
 }
 
 model NotionIntegration {
@@ -257,6 +258,23 @@ enum MoSCoW {
   SHOULD
   COULD
   WONT
+}
+
+model TrelloIntegration {
+  id                String    @id @default(cuid())
+  workspaceId       String    @unique
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  accessToken       String
+  accessTokenSecret String
+  trelloMemberId    String
+  trelloFullName    String
+  trelloUsername    String
+  defaultBoardId    String?
+  defaultBoardName  String?
+  defaultListId     String?
+  defaultListName   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 enum GitProvider {
