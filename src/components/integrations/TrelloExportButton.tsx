@@ -30,6 +30,8 @@ interface TrelloList {
 
 interface TrelloExportButtonProps {
   specId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 type ExportState = "idle" | "loading" | "success" | "error";
@@ -42,8 +44,10 @@ function TrelloIcon() {
   );
 }
 
-export function TrelloExportButton({ specId }: TrelloExportButtonProps) {
-  const [open, setOpen] = useState(false);
+export function TrelloExportButton({ specId, open: controlledOpen, onOpenChange }: TrelloExportButtonProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
 
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [loadingBoards, setLoadingBoards] = useState(false);
@@ -162,10 +166,12 @@ export function TrelloExportButton({ specId }: TrelloExportButtonProps) {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
-        <TrelloIcon />
-        Exporter en Trello
-      </Button>
+      {controlledOpen === undefined && (
+        <Button variant="outline" size="sm" onClick={handleOpen}>
+          <TrelloIcon />
+          Trello
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">

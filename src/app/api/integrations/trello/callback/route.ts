@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -26,13 +26,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Read the httpOnly cookie
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const cookieMatch = cookieHeader
-    .split(";")
-    .find((c) => c.trim().startsWith(`${COOKIE_NAME}=`));
+  const cookieValue = request.cookies.get(COOKIE_NAME)?.value;
 
-  if (!cookieMatch) {
-    return Response.redirect(
+  if (!cookieValue) {
+    return NextResponse.redirect(
       `${appUrl}/settings/integrations?error=trello_session_expired`
     );
   }
@@ -41,12 +38,11 @@ export async function GET(request: NextRequest) {
   let workspaceId: string;
 
   try {
-    const raw = decodeURIComponent(cookieMatch.trim().slice(COOKIE_NAME.length + 1));
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(cookieValue);
     tokenSecret = parsed.tokenSecret;
     workspaceId = parsed.workspaceId;
   } catch {
-    return Response.redirect(
+    return NextResponse.redirect(
       `${appUrl}/settings/integrations?error=trello_invalid_cookie`
     );
   }
@@ -88,16 +84,13 @@ export async function GET(request: NextRequest) {
     });
 
     // Clear the temporary cookie
-    const response = Response.redirect(
+    const response = NextResponse.redirect(
       `${appUrl}/settings/integrations?trello=connected`
     );
-    response.headers.set(
-      "Set-Cookie",
-      `${COOKIE_NAME}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`
-    );
+    response.cookies.set(COOKIE_NAME, "", { maxAge: 0, path: "/" });
     return response;
   } catch {
-    return Response.redirect(
+    return NextResponse.redirect(
       `${appUrl}/settings/integrations?error=trello_token_exchange`
     );
   }

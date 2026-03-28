@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { NotionConnect } from "@/components/integrations/notion-connect";
 import { GitIntegrationCard } from "@/components/integrations/GitIntegrationCard";
+import { TrelloIntegrationCard } from "@/components/integrations/TrelloIntegrationCard";
 
 export default async function IntegrationsPage() {
   const session = await requireSession();
@@ -15,7 +16,7 @@ export default async function IntegrationsPage() {
 
   const workspaceId = user.activeWorkspaceId;
 
-  const [notionIntegration, member, gitIntegrations] = workspaceId
+  const [notionIntegration, member, gitIntegrations, trelloIntegration] = workspaceId
     ? await Promise.all([
         prisma.notionIntegration.findUnique({
           where: { workspaceId },
@@ -39,8 +40,20 @@ export default async function IntegrationsPage() {
             createdAt: true,
           },
         }),
+        prisma.trelloIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            trelloUsername: true,
+            trelloFullName: true,
+            defaultBoardId: true,
+            defaultBoardName: true,
+            defaultListId: true,
+            defaultListName: true,
+            createdAt: true,
+          },
+        }),
       ])
-    : [null, null, []];
+    : [null, null, [], null];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
 
@@ -74,6 +87,36 @@ export default async function IntegrationsPage() {
               notionWorkspaceName={notionIntegration?.notionWorkspaceName}
               notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
               connectedAt={notionIntegration?.createdAt}
+              canManage={canManage}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Aucun espace de travail actif.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Trello integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Trello</CardTitle>
+          <CardDescription>
+            Exportez vos user stories directement en cartes Trello.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {workspaceId ? (
+            <TrelloIntegrationCard
+              workspaceId={workspaceId}
+              connected={!!trelloIntegration}
+              username={trelloIntegration?.trelloUsername}
+              fullName={trelloIntegration?.trelloFullName}
+              defaultBoardId={trelloIntegration?.defaultBoardId}
+              defaultBoardName={trelloIntegration?.defaultBoardName}
+              defaultListId={trelloIntegration?.defaultListId}
+              defaultListName={trelloIntegration?.defaultListName}
+              connectedAt={trelloIntegration?.createdAt}
               canManage={canManage}
             />
           ) : (

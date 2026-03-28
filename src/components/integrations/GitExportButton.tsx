@@ -24,12 +24,16 @@ interface ConnectedProvider {
 interface GitExportButtonProps {
   specId: string;
   connectedProviders: ConnectedProvider[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 type ExportState = "idle" | "loading" | "success" | "error";
 
-export function GitExportButton({ specId, connectedProviders }: GitExportButtonProps) {
-  const [open, setOpen] = useState(false);
+export function GitExportButton({ specId, connectedProviders, open: controlledOpen, onOpenChange }: GitExportButtonProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
   const [selectedProvider, setSelectedProvider] = useState<"GITHUB" | "GITLAB">(
     connectedProviders[0]?.provider ?? "GITHUB"
   );
@@ -129,10 +133,12 @@ export function GitExportButton({ specId, connectedProviders }: GitExportButtonP
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
-        <GitBranch className="h-4 w-4 mr-2" />
-        Exporter en issues
-      </Button>
+      {controlledOpen === undefined && (
+        <Button variant="outline" size="sm" onClick={handleOpen}>
+          <GitBranch className="h-4 w-4 mr-2" />
+          Exporter en issues
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
