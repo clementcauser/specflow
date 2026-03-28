@@ -1,6 +1,12 @@
 import { requireSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { NotionConnect } from "@/components/integrations/notion-connect";
 import { GitIntegrationCard } from "@/components/integrations/GitIntegrationCard";
@@ -17,61 +23,72 @@ export default async function IntegrationsPage() {
 
   const workspaceId = user.activeWorkspaceId;
 
-  const [notionIntegration, member, gitIntegrations, trelloIntegration, clickupIntegration] =
-    workspaceId
-      ? await Promise.all([
-          prisma.notionIntegration.findUnique({
-            where: { workspaceId },
-            select: {
-              notionWorkspaceName: true,
-              notionWorkspaceIcon: true,
-              createdAt: true,
-            },
-          }),
-          prisma.member.findUnique({
-            where: { userId_workspaceId: { userId: session.user.id, workspaceId } },
-            select: { role: true },
-          }),
-          prisma.gitIntegration.findMany({
-            where: { workspaceId },
-            select: {
-              provider: true,
-              providerAccountName: true,
-              defaultRepoOwner: true,
-              defaultRepoName: true,
-              createdAt: true,
-            },
-          }),
-          prisma.trelloIntegration.findUnique({
-            where: { workspaceId },
-            select: {
-              trelloUsername: true,
-              trelloFullName: true,
-              defaultBoardId: true,
-              defaultBoardName: true,
-              defaultListId: true,
-              defaultListName: true,
-              createdAt: true,
-            },
-          }),
-          prisma.clickUpIntegration.findUnique({
-            where: { workspaceId },
-            select: {
-              clickupUserName: true,
-              clickupWorkspaceName: true,
-              defaultSpaceId: true,
-              defaultListId: true,
-              defaultListName: true,
-              createdAt: true,
-            },
-          }),
-        ])
-      : [null, null, [], null, null];
+  const [
+    notionIntegration,
+    member,
+    gitIntegrations,
+    trelloIntegration,
+    clickupIntegration,
+  ] = workspaceId
+    ? await Promise.all([
+        prisma.notionIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            notionWorkspaceName: true,
+            notionWorkspaceIcon: true,
+            createdAt: true,
+          },
+        }),
+        prisma.member.findUnique({
+          where: {
+            userId_workspaceId: { userId: session.user.id, workspaceId },
+          },
+          select: { role: true },
+        }),
+        prisma.gitIntegration.findMany({
+          where: { workspaceId },
+          select: {
+            provider: true,
+            providerAccountName: true,
+            defaultRepoOwner: true,
+            defaultRepoName: true,
+            createdAt: true,
+          },
+        }),
+        prisma.trelloIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            trelloUsername: true,
+            trelloFullName: true,
+            defaultBoardId: true,
+            defaultBoardName: true,
+            defaultListId: true,
+            defaultListName: true,
+            createdAt: true,
+          },
+        }),
+        prisma.clickUpIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            clickupUserName: true,
+            clickupWorkspaceName: true,
+            defaultSpaceId: true,
+            defaultListId: true,
+            defaultListName: true,
+            createdAt: true,
+          },
+        }),
+      ])
+    : [null, null, [], null, null];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
 
-  const githubIntegration = gitIntegrations.find((g) => g.provider === "GITHUB");
-  const gitlabIntegration = gitIntegrations.find((g) => g.provider === "GITLAB");
+  const githubIntegration = gitIntegrations.find(
+    (g) => g.provider === "GITHUB",
+  );
+  const gitlabIntegration = gitIntegrations.find(
+    (g) => g.provider === "GITLAB",
+  );
 
   const showGitLab = !!process.env.GITLAB_CLIENT_ID;
 
@@ -100,6 +117,36 @@ export default async function IntegrationsPage() {
               notionWorkspaceName={notionIntegration?.notionWorkspaceName}
               notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
               connectedAt={notionIntegration?.createdAt}
+              canManage={canManage}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Aucun espace de travail actif.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Trello integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Trello</CardTitle>
+          <CardDescription>
+            Exportez vos user stories directement en cartes Trello.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {workspaceId ? (
+            <TrelloIntegrationCard
+              workspaceId={workspaceId}
+              connected={!!trelloIntegration}
+              username={trelloIntegration?.trelloUsername}
+              fullName={trelloIntegration?.trelloFullName}
+              defaultBoardId={trelloIntegration?.defaultBoardId}
+              defaultBoardName={trelloIntegration?.defaultBoardName}
+              defaultListId={trelloIntegration?.defaultListId}
+              defaultListName={trelloIntegration?.defaultListName}
+              connectedAt={trelloIntegration?.createdAt}
               canManage={canManage}
             />
           ) : (
@@ -161,7 +208,8 @@ export default async function IntegrationsPage() {
         <CardHeader>
           <CardTitle className="text-base">Gestion des tâches</CardTitle>
           <CardDescription>
-            Exportez vos user stories en cartes ou tâches dans vos outils de gestion.
+            Exportez vos user stories en cartes ou tâches dans vos outils de
+            gestion.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

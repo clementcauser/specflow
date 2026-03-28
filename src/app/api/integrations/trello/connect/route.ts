@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -44,14 +44,16 @@ export async function GET(_request: NextRequest) {
       workspaceId: user.activeWorkspaceId,
     });
 
-    const response = Response.redirect(authorizeUrl.toString());
-    response.headers.set(
-      "Set-Cookie",
-      `${COOKIE_NAME}=${encodeURIComponent(cookieValue)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${COOKIE_MAX_AGE}`
-    );
+    const response = NextResponse.redirect(authorizeUrl.toString());
+    response.cookies.set(COOKIE_NAME, cookieValue, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: COOKIE_MAX_AGE,
+    });
     return response;
   } catch {
-    return Response.redirect(
+    return NextResponse.redirect(
       `${appUrl}/settings/integrations?error=trello_request_token`
     );
   }

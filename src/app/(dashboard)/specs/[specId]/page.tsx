@@ -6,8 +6,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { getSpec } from "@/actions/specs";
-import { ExportMenu } from "@/components/specs/export-menu";
-import { GitExportButton } from "@/components/integrations/GitExportButton";
+import { SpecExportBar } from "@/components/specs/spec-export-bar";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
@@ -26,17 +25,27 @@ export default async function SpecPage({
     select: { activeWorkspaceId: true },
   });
 
-  const gitIntegrations = user?.activeWorkspaceId
-    ? await prisma.gitIntegration.findMany({
-        where: { workspaceId: user.activeWorkspaceId },
-        select: {
-          provider: true,
-          providerAccountName: true,
-          defaultRepoOwner: true,
-          defaultRepoName: true,
-        },
-      })
-    : [];
+  const [gitIntegrations, trelloIntegration, notionIntegration] = user?.activeWorkspaceId
+    ? await Promise.all([
+        prisma.gitIntegration.findMany({
+          where: { workspaceId: user.activeWorkspaceId },
+          select: {
+            provider: true,
+            providerAccountName: true,
+            defaultRepoOwner: true,
+            defaultRepoName: true,
+          },
+        }),
+        prisma.trelloIntegration.findUnique({
+          where: { workspaceId: user.activeWorkspaceId },
+          select: { trelloMemberId: true },
+        }),
+        prisma.notionIntegration.findUnique({
+          where: { workspaceId: user.activeWorkspaceId },
+          select: { notionWorkspaceId: true },
+        }),
+      ])
+    : [[], null, null];
 
   const connectedProviders = gitIntegrations.map((g) => ({
     provider: g.provider as "GITHUB" | "GITLAB",
@@ -55,10 +64,16 @@ export default async function SpecPage({
           </Link>
         </Button>
         <div className="flex items-center gap-2">
-          <ExportMenu specId={specId} specTitle={spec.title} />
-          {connectedProviders.length > 0 && content.userStories && (
-            <GitExportButton specId={specId} connectedProviders={connectedProviders} />
-          )}
+          {/* Mobile: dropdown export in top bar */}
+          <div className="sm:hidden">
+            <SpecExportBar
+              specId={specId}
+              specTitle={spec.title}
+              notionConnected={!!notionIntegration}
+              connectedProviders={connectedProviders}
+              trelloConnected={!!trelloIntegration}
+            />
+          </div>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/specs/${specId}/edit`}>
               <Pencil className="h-4 w-4 mr-2" />
@@ -66,6 +81,17 @@ export default async function SpecPage({
             </Link>
           </Button>
         </div>
+      </div>
+
+      {/* Desktop: prominent export bar between nav and title */}
+      <div className="hidden sm:block">
+        <SpecExportBar
+          specId={specId}
+          specTitle={spec.title}
+          notionConnected={!!notionIntegration}
+          connectedProviders={connectedProviders}
+          trelloConnected={!!trelloIntegration}
+        />
       </div>
 
       <div className="space-y-1">
