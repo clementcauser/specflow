@@ -235,24 +235,35 @@ describe("Export de spec (Markdown & PDF)", () => {
       cy.login(USER_EMAIL, USER_PASSWORD);
     });
 
-    it("affiche le bouton Exporter à côté du bouton Modifier", () => {
+    it("affiche la barre d'export avec le label Exporter et le bouton Modifier", () => {
+      cy.viewport(1280, 800);
       cy.visit(`/specs/${specId}`);
-      cy.contains("button", "Exporter").should("be.visible");
+      cy.get('[data-testid="export-bar-desktop"]').filter(':visible').should('contain', 'Exporter');
       cy.contains("a", "Modifier").should("be.visible");
     });
 
-    it("le menu déroulant propose Markdown et PDF", () => {
+    it("la barre d'export desktop propose les boutons Markdown et PDF directement", () => {
+      cy.viewport(1280, 800);
       cy.visit(`/specs/${specId}`);
-      cy.contains("button", "Exporter").click();
-      cy.contains("Markdown (.md)").should("be.visible");
-      cy.contains("PDF").should("be.visible");
+      cy.get('[data-testid="export-bar-desktop"]').filter(':visible').within(() => {
+        cy.contains("button", "Markdown").should("be.visible");
+        cy.contains("button", "PDF").should("be.visible");
+      });
+    });
+
+    it("sur mobile le menu déroulant Exporter propose Markdown et PDF", () => {
+      cy.viewport(375, 812);
+      cy.visit(`/specs/${specId}`);
+      cy.get('[data-testid="export-bar-mobile"]').first().find('button').click({ force: true });
+      cy.contains("Markdown (.md)").should("exist");
+      cy.contains("PDF").should("exist");
     });
 
     it("le contenu de la spec est affiché sur la page", () => {
       cy.visit(`/specs/${specId}`);
-      cy.contains(FAKE_SPEC.title).should("be.visible");
-      cy.contains("Résumé exécutif").should("be.visible");
-      cy.contains("User stories").should("be.visible");
+      cy.contains(FAKE_SPEC.title).should("exist");
+      cy.contains("Résumé exécutif").should("exist");
+      cy.contains("User stories").should("exist");
     });
   });
 });

@@ -25,7 +25,7 @@ export default async function SpecPage({
     select: { activeWorkspaceId: true },
   });
 
-  const [gitIntegrations, trelloIntegration, notionIntegration] = user?.activeWorkspaceId
+  const [gitIntegrations, trelloIntegration, notionIntegration, clickupIntegration] = user?.activeWorkspaceId
     ? await Promise.all([
         prisma.gitIntegration.findMany({
           where: { workspaceId: user.activeWorkspaceId },
@@ -44,8 +44,12 @@ export default async function SpecPage({
           where: { workspaceId: user.activeWorkspaceId },
           select: { notionWorkspaceId: true },
         }),
+        prisma.clickUpIntegration.findUnique({
+          where: { workspaceId: user.activeWorkspaceId },
+          select: { clickupUserId: true },
+        }),
       ])
-    : [[], null, null];
+    : [[], null, null, null];
 
   const connectedProviders = gitIntegrations.map((g) => ({
     provider: g.provider as "GITHUB" | "GITLAB",
@@ -72,6 +76,7 @@ export default async function SpecPage({
               notionConnected={!!notionIntegration}
               connectedProviders={connectedProviders}
               trelloConnected={!!trelloIntegration}
+              clickupConnected={!!clickupIntegration}
             />
           </div>
           <Button variant="outline" size="sm" asChild>
@@ -91,6 +96,7 @@ export default async function SpecPage({
           notionConnected={!!notionIntegration}
           connectedProviders={connectedProviders}
           trelloConnected={!!trelloIntegration}
+              clickupConnected={!!clickupIntegration}
         />
       </div>
 
