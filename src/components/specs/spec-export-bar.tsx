@@ -14,6 +14,7 @@ import { Download, FileText, FileDown, Loader2, GitBranch } from "lucide-react";
 import { NotionExportModal } from "./notion-export-modal";
 import { GitExportButton } from "@/components/integrations/GitExportButton";
 import { TrelloExportButton } from "@/components/integrations/TrelloExportButton";
+import { ClickUpExportButton } from "@/components/integrations/ClickUpExportButton";
 
 interface ConnectedProvider {
   provider: "GITHUB" | "GITLAB";
@@ -28,6 +29,7 @@ interface SpecExportBarProps {
   notionConnected: boolean;
   connectedProviders: ConnectedProvider[];
   trelloConnected: boolean;
+  clickupConnected: boolean;
 }
 
 function NotionIcon() {
@@ -46,17 +48,27 @@ function TrelloIcon() {
   );
 }
 
+function ClickUpIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
+      <path d="M2.37 17.2 5.63 14.6c1.74 2.3 3.59 3.35 5.73 3.35 2.13 0 3.95-1.03 5.65-3.29l3.3 2.52C17.77 20.5 15.03 22 11.36 22 7.72 22 4.97 20.52 2.37 17.2ZM11.37 2l5.6 5.01-2.26 2.53c-1-1.02-2.14-1.62-3.34-1.62-1.21 0-2.38.62-3.4 1.67L5.71 7.1 11.37 2Z" />
+    </svg>
+  );
+}
+
 export function SpecExportBar({
   specId,
   specTitle,
   notionConnected,
   connectedProviders,
   trelloConnected,
+  clickupConnected,
 }: SpecExportBarProps) {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [notionOpen, setNotionOpen] = useState(false);
   const [gitOpen, setGitOpen] = useState(false);
   const [trelloOpen, setTrelloOpen] = useState(false);
+  const [clickupOpen, setClickupOpen] = useState(false);
 
   async function handleDownload(format: "markdown" | "pdf") {
     if (format === "pdf") setLoadingPdf(true);
@@ -86,7 +98,7 @@ export function SpecExportBar({
   return (
     <>
       {/* ── Desktop ── */}
-      <div className="hidden sm:flex items-center justify-between gap-4 bg-card ring-1 ring-foreground/10 rounded-xl px-4 py-3">
+      <div data-testid="export-bar-desktop" className="hidden sm:flex items-center justify-between gap-4 bg-card ring-1 ring-foreground/10 rounded-xl px-4 py-3">
         <span className="text-sm font-semibold">Exporter</span>
         <div className="flex items-center gap-2 flex-wrap">
 
@@ -120,11 +132,18 @@ export function SpecExportBar({
             Trello
           </Button>
         )}
+
+        {clickupConnected && (
+          <Button variant="outline" size="sm" onClick={() => setClickupOpen(true)}>
+            <ClickUpIcon />
+            ClickUp
+          </Button>
+        )}
         </div>
       </div>
 
       {/* ── Mobile dropdown ── */}
-      <div className="flex sm:hidden">
+      <div data-testid="export-bar-mobile" className="flex sm:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
@@ -147,7 +166,7 @@ export function SpecExportBar({
               <FileDown className="h-4 w-4" />
               PDF
             </DropdownMenuItem>
-            {(notionConnected || connectedProviders.length > 0 || trelloConnected) && (
+            {(notionConnected || connectedProviders.length > 0 || trelloConnected || clickupConnected) && (
               <DropdownMenuSeparator />
             )}
             {notionConnected && (
@@ -166,6 +185,12 @@ export function SpecExportBar({
               <DropdownMenuItem onClick={() => setTrelloOpen(true)}>
                 <TrelloIcon />
                 Trello
+              </DropdownMenuItem>
+            )}
+            {clickupConnected && (
+              <DropdownMenuItem onClick={() => setClickupOpen(true)}>
+                <ClickUpIcon />
+                ClickUp
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
@@ -194,6 +219,14 @@ export function SpecExportBar({
           specId={specId}
           open={trelloOpen}
           onOpenChange={setTrelloOpen}
+        />
+      )}
+
+      {clickupConnected && (
+        <ClickUpExportButton
+          specId={specId}
+          open={clickupOpen}
+          onOpenChange={setClickupOpen}
         />
       )}
     </>

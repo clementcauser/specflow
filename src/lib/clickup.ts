@@ -80,20 +80,33 @@ export async function getLists(
   token: string,
   spaceId: string
 ): Promise<ClickUpList[]> {
-  const res = await clickupFetch(
-    token,
-    `/space/${spaceId}/list?archived=false`
-  );
+  const [folderlessRes, foldersRes] = await Promise.all([
+    clickupFetch(token, `/space/${spaceId}/list?archived=false`),
+    clickupFetch(token, `/space/${spaceId}/folder?archived=false`),
+  ]);
 
-  if (!res.ok) {
-    throw new Error(`ClickUp getLists failed: ${res.status} ${res.statusText}`);
+  if (!folderlessRes.ok) {
+    throw new Error(`ClickUp getLists failed: ${folderlessRes.status} ${folderlessRes.statusText}`);
   }
 
-  const data = await res.json();
-  return (data.lists ?? []).map((l: { id: string; name: string }) => ({
-    id: l.id,
-    name: l.name,
-  }));
+  const folderlessData = await folderlessRes.json();
+  const folderlessLists: ClickUpList[] = (folderlessData.lists ?? []).map(
+    (l: { id: string; name: string }) => ({ id: l.id, name: l.name })
+  );
+
+  if (!foldersRes.ok) {
+    return folderlessLists;
+  }
+
+  const foldersData = await foldersRes.json();
+  const folders: { id: string; name: string; lists: { id: string; name: string }[] }[] =
+    foldersData.folders ?? [];
+
+  const folderLists: ClickUpList[] = folders.flatMap((f) =>
+    (f.lists ?? []).map((l) => ({ id: l.id, name: `${f.name} / ${l.name}` }))
+  );
+
+  return [...folderlessLists, ...folderLists];
 }
 
 export async function createTask(

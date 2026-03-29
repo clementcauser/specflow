@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +30,8 @@ interface ClickUpList {
 
 interface ClickUpExportButtonProps {
   specId: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 type ExportState = "idle" | "loading" | "success" | "error";
@@ -42,8 +44,10 @@ function ClickUpIcon() {
   );
 }
 
-export function ClickUpExportButton({ specId }: ClickUpExportButtonProps) {
-  const [open, setOpen] = useState(false);
+export function ClickUpExportButton({ specId, open: controlledOpen, onOpenChange }: ClickUpExportButtonProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange !== undefined ? onOpenChange : setInternalOpen;
 
   const [spaces, setSpaces] = useState<ClickUpSpace[]>([]);
   const [loadingSpaces, setLoadingSpaces] = useState(false);
@@ -61,6 +65,15 @@ export function ClickUpExportButton({ specId }: ClickUpExportButtonProps) {
     errors: string[];
     listName: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setExportState("idle");
+      setExportResult(null);
+      loadSpaces();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   async function loadSpaces() {
     setLoadingSpaces(true);
