@@ -168,10 +168,12 @@ export function ClickUpExportButton({ specId, open: controlledOpen, onOpenChange
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
-        <ClickUpIcon />
-        Exporter en ClickUp
-      </Button>
+      {onOpenChange === undefined && (
+        <Button variant="outline" size="sm" onClick={handleOpen}>
+          <ClickUpIcon />
+          Exporter en ClickUp
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">

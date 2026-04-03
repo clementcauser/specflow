@@ -12,6 +12,7 @@ import { NotionConnect } from "@/components/integrations/notion-connect";
 import { GitIntegrationCard } from "@/components/integrations/GitIntegrationCard";
 import { TrelloIntegrationCard } from "@/components/integrations/TrelloIntegrationCard";
 import { ClickUpIntegrationCard } from "@/components/integrations/ClickUpIntegrationCard";
+import { JiraIntegrationCard } from "@/components/integrations/JiraIntegrationCard";
 
 export default async function IntegrationsPage() {
   const session = await requireSession();
@@ -29,6 +30,7 @@ export default async function IntegrationsPage() {
     gitIntegrations,
     trelloIntegration,
     clickupIntegration,
+    jiraIntegration,
   ] = workspaceId
     ? await Promise.all([
         prisma.notionIntegration.findUnique({
@@ -78,8 +80,19 @@ export default async function IntegrationsPage() {
             createdAt: true,
           },
         }),
+        prisma.jiraIntegration.findUnique({
+          where: { workspaceId },
+          select: {
+            cloudId: true,
+            cloudName: true,
+            cloudUrl: true,
+            defaultProjectKey: true,
+            defaultProjectName: true,
+            createdAt: true,
+          },
+        }),
       ])
-    : [null, null, [], null, null];
+    : [null, null, [], null, null, null];
 
   const canManage = !!member && ["OWNER", "ADMIN"].includes(member.role);
 
@@ -101,68 +114,12 @@ export default async function IntegrationsPage() {
         </p>
       </div>
 
-      {/* Documentation tools */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Outils d&apos;export</CardTitle>
-          <CardDescription>
-            Exportez vos specs directement dans vos outils de documentation.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {workspaceId ? (
-            <NotionConnect
-              workspaceId={workspaceId}
-              connected={!!notionIntegration}
-              notionWorkspaceName={notionIntegration?.notionWorkspaceName}
-              notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
-              connectedAt={notionIntegration?.createdAt}
-              canManage={canManage}
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Aucun espace de travail actif.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Trello integration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Trello</CardTitle>
-          <CardDescription>
-            Exportez vos user stories directement en cartes Trello.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {workspaceId ? (
-            <TrelloIntegrationCard
-              workspaceId={workspaceId}
-              connected={!!trelloIntegration}
-              username={trelloIntegration?.trelloUsername}
-              fullName={trelloIntegration?.trelloFullName}
-              defaultBoardId={trelloIntegration?.defaultBoardId}
-              defaultBoardName={trelloIntegration?.defaultBoardName}
-              defaultListId={trelloIntegration?.defaultListId}
-              defaultListName={trelloIntegration?.defaultListName}
-              connectedAt={trelloIntegration?.createdAt}
-              canManage={canManage}
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Aucun espace de travail actif.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Git integrations */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Gestion de projet</CardTitle>
+          <CardTitle className="text-base">Outils Git</CardTitle>
           <CardDescription>
-            Exportez vos user stories directement en issues GitHub ou GitLab.
+            Exportez vos user stories en issues sur vos dépôts Git.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -206,15 +163,27 @@ export default async function IntegrationsPage() {
       {/* Task management integrations */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Gestion des tâches</CardTitle>
+          <CardTitle className="text-base">Gestion de projets</CardTitle>
           <CardDescription>
             Exportez vos user stories en cartes ou tâches dans vos outils de
-            gestion.
+            gestion de projets
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {workspaceId ? (
             <>
+              <JiraIntegrationCard
+                workspaceId={workspaceId}
+                connected={!!jiraIntegration}
+                cloudName={jiraIntegration?.cloudName ?? undefined}
+                cloudUrl={jiraIntegration?.cloudUrl ?? undefined}
+                siteConfigured={!!jiraIntegration?.cloudId}
+                defaultProjectKey={jiraIntegration?.defaultProjectKey}
+                defaultProjectName={jiraIntegration?.defaultProjectName}
+                connectedAt={jiraIntegration?.createdAt}
+                canManage={canManage}
+              />
+              <Separator />
               <TrelloIntegrationCard
                 workspaceId={workspaceId}
                 connected={!!trelloIntegration}
@@ -237,6 +206,15 @@ export default async function IntegrationsPage() {
                 defaultListId={clickupIntegration?.defaultListId}
                 defaultListName={clickupIntegration?.defaultListName}
                 connectedAt={clickupIntegration?.createdAt}
+                canManage={canManage}
+              />
+              <Separator />
+              <NotionConnect
+                workspaceId={workspaceId}
+                connected={!!notionIntegration}
+                notionWorkspaceName={notionIntegration?.notionWorkspaceName}
+                notionWorkspaceIcon={notionIntegration?.notionWorkspaceIcon}
+                connectedAt={notionIntegration?.createdAt}
                 canManage={canManage}
               />
             </>

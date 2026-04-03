@@ -174,10 +174,12 @@ export function JiraExportButton({
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
-        <JiraIcon />
-        Exporter vers Jira
-      </Button>
+      {onOpenChange === undefined && (
+        <Button variant="outline" size="sm" onClick={handleOpen}>
+          <JiraIcon />
+          Exporter vers Jira
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
