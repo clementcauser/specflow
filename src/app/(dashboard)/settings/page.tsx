@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plug, ChevronRight, User } from "lucide-react";
+import { Plug, ChevronRight, User, CreditCard } from "lucide-react";
 import { LogoutButton } from "@/components/settings/logout-button";
 
 export default async function SettingsPage() {
@@ -38,7 +38,24 @@ export default async function SettingsPage() {
             <div>
               <p className="text-sm font-medium">Intégrations</p>
               <p className="text-xs text-muted-foreground">
-                Connectez Notion et d&apos;autres outils pour enrichir vos exports.
+                Connectez Notion et d&apos;autres outils pour enrichir vos
+                exports.
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
+
+        <Link
+          href="/settings/billing"
+          className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <CreditCard className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Facturation</p>
+              <p className="text-xs text-muted-foreground">
+                Votre plan, abonnement et utilisation mensuelle.
               </p>
             </div>
           </div>
