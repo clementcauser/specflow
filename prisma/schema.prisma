@@ -87,6 +87,7 @@ model Workspace {
   gitIntegrations    GitIntegration[]
   trelloIntegration   TrelloIntegration?
   clickupIntegration  ClickUpIntegration?
+  jiraIntegration     JiraIntegration?
 }
 
 model NotionIntegration {
@@ -292,6 +293,22 @@ model TrelloIntegration {
   defaultListName   String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model JiraIntegration {
+  id                 String    @id @default(cuid())
+  workspaceId        String    @unique
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  accessToken        String
+  refreshToken       String
+  expiresAt          DateTime
+  cloudId            String?
+  cloudName          String?
+  cloudUrl           String?
+  defaultProjectKey  String?
+  defaultProjectName String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 enum GitProvider {

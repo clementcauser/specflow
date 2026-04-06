@@ -15,6 +15,7 @@ import { NotionExportModal } from "./notion-export-modal";
 import { GitExportButton } from "@/components/integrations/GitExportButton";
 import { TrelloExportButton } from "@/components/integrations/TrelloExportButton";
 import { ClickUpExportButton } from "@/components/integrations/ClickUpExportButton";
+import { JiraExportButton } from "@/components/integrations/JiraExportButton";
 
 interface ConnectedProvider {
   provider: "GITHUB" | "GITLAB";
@@ -30,6 +31,7 @@ interface SpecExportBarProps {
   connectedProviders: ConnectedProvider[];
   trelloConnected: boolean;
   clickupConnected: boolean;
+  jiraConnected: boolean;
 }
 
 function NotionIcon() {
@@ -44,6 +46,14 @@ function TrelloIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
       <path d="M21 0H3C1.343 0 0 1.343 0 3v18c0 1.656 1.343 3 3 3h18c1.656 0 3-1.344 3-3V3c0-1.657-1.344-3-3-3zM10.44 18.18c0 .795-.645 1.44-1.44 1.44H4.56c-.795 0-1.44-.645-1.44-1.44V4.56c0-.795.645-1.44 1.44-1.44H9c.795 0 1.44.645 1.44 1.44v13.62zm10.44-6c0 .794-.645 1.44-1.44 1.44H15c-.795 0-1.44-.646-1.44-1.44V4.56c0-.795.645-1.44 1.44-1.44h4.44c.795 0 1.44.645 1.44 1.44v7.62z" />
+    </svg>
+  );
+}
+
+function JiraIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="currentColor">
+      <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.004-1.005zm5.723-5.756H5.757a5.218 5.218 0 0 0 5.233 5.214h2.13v2.058A5.215 5.215 0 0 0 18.297 18.3V6.762a1.005 1.005 0 0 0-1.003-1.005zm5.701-5.757H11.48a5.218 5.218 0 0 0 5.232 5.214h2.13V7.272A5.215 5.215 0 0 0 24 12.518V1.005A1.005 1.005 0 0 0 22.995 0z" />
     </svg>
   );
 }
@@ -63,12 +73,14 @@ export function SpecExportBar({
   connectedProviders,
   trelloConnected,
   clickupConnected,
+  jiraConnected,
 }: SpecExportBarProps) {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [notionOpen, setNotionOpen] = useState(false);
   const [gitOpen, setGitOpen] = useState(false);
   const [trelloOpen, setTrelloOpen] = useState(false);
   const [clickupOpen, setClickupOpen] = useState(false);
+  const [jiraOpen, setJiraOpen] = useState(false);
 
   async function handleDownload(format: "markdown" | "pdf") {
     if (format === "pdf") setLoadingPdf(true);
@@ -102,27 +114,10 @@ export function SpecExportBar({
         <span className="text-sm font-semibold">Exporter</span>
         <div className="flex items-center gap-2 flex-wrap">
 
-        <Button variant="outline" size="sm" onClick={() => handleDownload("markdown")}>
-          <FileText className="h-4 w-4" />
-          Markdown
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={() => handleDownload("pdf")} disabled={loadingPdf}>
-          {loadingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-          PDF
-        </Button>
-
-        {notionConnected && (
-          <Button variant="outline" size="sm" onClick={() => setNotionOpen(true)}>
-            <NotionIcon />
-            Notion
-          </Button>
-        )}
-
-        {connectedProviders.length > 0 && (
-          <Button variant="outline" size="sm" onClick={() => setGitOpen(true)}>
-            <GitBranch className="h-4 w-4" />
-            {gitLabel}
+        {jiraConnected && (
+          <Button variant="outline" size="sm" onClick={() => setJiraOpen(true)}>
+            <JiraIcon />
+            Jira
           </Button>
         )}
 
@@ -139,6 +134,30 @@ export function SpecExportBar({
             ClickUp
           </Button>
         )}
+
+        {notionConnected && (
+          <Button variant="outline" size="sm" onClick={() => setNotionOpen(true)}>
+            <NotionIcon />
+            Notion
+          </Button>
+        )}
+
+        {connectedProviders.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() => setGitOpen(true)}>
+            <GitBranch className="h-4 w-4" />
+            {gitLabel}
+          </Button>
+        )}
+
+        <Button variant="outline" size="sm" onClick={() => handleDownload("markdown")}>
+          <FileText className="h-4 w-4" />
+          Markdown
+        </Button>
+
+        <Button variant="outline" size="sm" onClick={() => handleDownload("pdf")} disabled={loadingPdf}>
+          {loadingPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+          PDF
+        </Button>
         </div>
       </div>
 
@@ -158,27 +177,10 @@ export function SpecExportBar({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Format d&apos;export</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleDownload("markdown")}>
-              <FileText className="h-4 w-4" />
-              Markdown (.md)
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDownload("pdf")} disabled={loadingPdf}>
-              <FileDown className="h-4 w-4" />
-              PDF
-            </DropdownMenuItem>
-            {(notionConnected || connectedProviders.length > 0 || trelloConnected || clickupConnected) && (
-              <DropdownMenuSeparator />
-            )}
-            {notionConnected && (
-              <DropdownMenuItem onClick={() => setNotionOpen(true)}>
-                <NotionIcon />
-                Notion
-              </DropdownMenuItem>
-            )}
-            {connectedProviders.length > 0 && (
-              <DropdownMenuItem onClick={() => setGitOpen(true)}>
-                <GitBranch className="h-4 w-4" />
-                {gitLabel}
+            {jiraConnected && (
+              <DropdownMenuItem onClick={() => setJiraOpen(true)}>
+                <JiraIcon />
+                Jira
               </DropdownMenuItem>
             )}
             {trelloConnected && (
@@ -193,6 +195,29 @@ export function SpecExportBar({
                 ClickUp
               </DropdownMenuItem>
             )}
+            {notionConnected && (
+              <DropdownMenuItem onClick={() => setNotionOpen(true)}>
+                <NotionIcon />
+                Notion
+              </DropdownMenuItem>
+            )}
+            {connectedProviders.length > 0 && (
+              <DropdownMenuItem onClick={() => setGitOpen(true)}>
+                <GitBranch className="h-4 w-4" />
+                {gitLabel}
+              </DropdownMenuItem>
+            )}
+            {(notionConnected || connectedProviders.length > 0 || trelloConnected || clickupConnected || jiraConnected) && (
+              <DropdownMenuSeparator />
+            )}
+            <DropdownMenuItem onClick={() => handleDownload("markdown")}>
+              <FileText className="h-4 w-4" />
+              Markdown (.md)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDownload("pdf")} disabled={loadingPdf}>
+              <FileDown className="h-4 w-4" />
+              PDF
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -227,6 +252,14 @@ export function SpecExportBar({
           specId={specId}
           open={clickupOpen}
           onOpenChange={setClickupOpen}
+        />
+      )}
+
+      {jiraConnected && (
+        <JiraExportButton
+          specId={specId}
+          open={jiraOpen}
+          onOpenChange={setJiraOpen}
         />
       )}
     </>
