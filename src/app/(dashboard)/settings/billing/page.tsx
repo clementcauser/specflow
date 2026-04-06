@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeButton, ManageSubscriptionButton } from "@/components/billing/billing-actions";
+import { CheckoutSuccessToast } from "@/components/billing/checkout-success-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -60,6 +61,7 @@ export default async function BillingPage() {
 
   return (
     <div className="space-y-8 max-w-2xl">
+      <CheckoutSuccessToast />
       <div>
         <h1 className="text-2xl font-semibold">Facturation</h1>
         <p className="text-muted-foreground text-sm mt-1">

@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
         const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
         const priceId = subscription.items.data[0]?.price.id ?? "";
 
+        const item = subscription.items.data[0];
+        const periodEnd = item?.current_period_end;
+
         await prisma.workspace.update({
           where: { id: workspaceId },
           data: {
@@ -46,7 +49,7 @@ export async function POST(request: NextRequest) {
             subscriptionStatus: subscription.status,
             stripePriceId: priceId,
             plan: priceIdToPlan(priceId),
-            currentPeriodEnd: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000),
+            currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
           },
         });
         break;
@@ -54,7 +57,9 @@ export async function POST(request: NextRequest) {
 
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const priceId = subscription.items.data[0]?.price.id ?? "";
+        const item = subscription.items.data[0];
+        const priceId = item?.price.id ?? "";
+        const periodEnd = item?.current_period_end;
 
         await prisma.workspace.updateMany({
           where: { subscriptionId: subscription.id },
@@ -62,7 +67,7 @@ export async function POST(request: NextRequest) {
             subscriptionStatus: subscription.status,
             stripePriceId: priceId,
             plan: priceIdToPlan(priceId),
-            currentPeriodEnd: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000),
+            currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
           },
         });
         break;
