@@ -28,8 +28,7 @@ function slugify(v: string) {
 const PROFILES = [
   { value: "FREELANCE", label: "Freelance / indépendant" },
   { value: "AGENCY", label: "Agence web / digitale" },
-  { value: "STARTUP", label: "Startup / éditeur SaaS" },
-  { value: "INTERNAL", label: "Équipe interne / DSI" },
+  { value: "PRODUCT", label: "Startup / éditeur SaaS" },
 ];
 
 const PRODUCTS = [

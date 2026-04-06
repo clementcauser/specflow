@@ -1,13 +1,11 @@
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { generateUid } from "../support/utils";
 
-function uid() {
-  return Math.random().toString(36).substring(7);
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("Gestion des workspaces", () => {
-  const id = uid();
+  const id = generateUid();
   const ownerEmail = `test-ws-${id}@example.com`;
   const ownerPassword = "Password123!";
   const ownerName = "Owner User";
@@ -57,7 +55,7 @@ describe("Gestion des workspaces", () => {
     });
 
     it("crée un workspace AGENCY en 3 étapes", () => {
-      const name = `Agence Test ${uid()}`;
+      const name = `Agence Test ${generateUid()}`;
 
       cy.visit("/workspaces/new");
 
@@ -85,7 +83,7 @@ describe("Gestion des workspaces", () => {
     });
 
     it("crée un workspace PRODUCT avec contexte produit", () => {
-      const name = `Mon Produit ${uid()}`;
+      const name = `Mon Produit ${generateUid()}`;
 
       cy.visit("/workspaces/new");
 
@@ -114,7 +112,7 @@ describe("Gestion des workspaces", () => {
     });
 
     it("crée un workspace FREELANCE", () => {
-      const name = `Thomas Dev ${uid()}`;
+      const name = `Thomas Dev ${generateUid()}`;
 
       cy.visit("/workspaces/new");
 
@@ -172,7 +170,7 @@ describe("Gestion des workspaces", () => {
 
     it("active un workspace depuis la liste", () => {
       // Seed un second workspace pour avoir un workspace inactif
-      const secondSlug = `ws-second-${uid()}`;
+      const secondSlug = `ws-second-${generateUid()}`;
       cy.task("seedWorkspace", {
         ownerEmail,
         name: `Second Workspace`,
@@ -216,7 +214,7 @@ describe("Gestion des workspaces", () => {
         cy.visit(`/settings/workspaces/${workspaceId}`);
       });
 
-      const newName = `Workspace Renommé ${uid()}`;
+      const newName = `Workspace Renommé ${generateUid()}`;
 
       cy.get("#name").clear().type(newName);
       cy.contains("Enregistrer").click();
@@ -229,7 +227,7 @@ describe("Gestion des workspaces", () => {
 
     it("refuse un slug déjà utilisé", () => {
       // Crée un second workspace pour avoir un slug existant
-      const conflictSlug = `ws-conflict-${uid()}`;
+      const conflictSlug = `ws-conflict-${generateUid()}`;
       cy.task("seedWorkspace", {
         ownerEmail,
         name: "Workspace Conflit",
@@ -253,7 +251,7 @@ describe("Gestion des workspaces", () => {
 
   describe("Suppression d'un workspace", () => {
     it("owner peut supprimer un workspace après confirmation", () => {
-      const deleteSlug = `ws-delete-${uid()}`;
+      const deleteSlug = `ws-delete-${generateUid()}`;
       const deleteName = "Workspace À Supprimer";
 
       cy.task("seedWorkspace", {

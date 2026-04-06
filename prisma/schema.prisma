@@ -71,6 +71,11 @@ model Workspace {
   type               WorkspaceType
   plan               WorkspacePlan          @default(FREE)
   config             Json                   @default("{}")
+  stripeCustomerId   String?                @unique
+  subscriptionStatus String?
+  stripePriceId      String?
+  subscriptionId     String?                @unique
+  currentPeriodEnd   DateTime?
   teamSize           WorkspaceTeamSize?
   tagline            String?
   productDescription String?                @db.Text
@@ -211,7 +216,7 @@ model Project {
 enum WorkspacePlan {
   FREE
   PRO
-  ENTERPRISE
+  MAX
 }
 
 enum WorkspaceRole {

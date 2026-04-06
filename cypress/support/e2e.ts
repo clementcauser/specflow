@@ -20,6 +20,7 @@ declare global {
         type?: string;
       }): string;
       getWorkspaceId(slug: string): string | null;
+      setActiveWorkspace(params: { email: string; slug: string }): null;
       deleteWorkspace(slug: string): null;
 
       // Membres

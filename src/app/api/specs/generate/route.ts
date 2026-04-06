@@ -34,8 +34,10 @@ type PromptContext =
     }
   | {
       mode: "epic"; // PRODUCT
-      title: string;
-      description: string;
+      epicTitle: string;
+      epicDescription: string | null;
+      specTitle: string;
+      specDescription: string;
     };
 
 // ─── Workspace context ────────────────────────────────────────────────────────
@@ -121,10 +123,13 @@ function buildPrompt(
 **Stack technique :** ${context.stack}
 **Description du besoin :** ${context.description}
 ${context.clientName ? `**Client :** ${context.clientName}` : ""}`
-      : `**Titre de l'epic :** ${context.title}
-**Description :** ${context.description}
+      : `**Épique parente :** ${context.epicTitle}${context.epicDescription ? `\n**Contexte de l'épique :** ${context.epicDescription}` : ""}
+
+**Feature à spécifier :** ${context.specTitle}
+**Description de la feature :** ${context.specDescription}
+
 La stack technique et le contexte produit sont définis dans le contexte workspace ci-dessus.
-Génère la spec en cohérence avec ce contexte — pas besoin de le rappeler dans la spec.`;
+Génère la spec de cette feature en cohérence avec l'épique parente et le contexte workspace — ne les réexplique pas dans la spec.`;
 
   return `${workspaceContext}
 
@@ -201,8 +206,10 @@ export async function POST(request: NextRequest) {
       }
     : {
         mode: "epic",
-        title: spec.title,
-        description: spec.Epic?.description ?? spec.prompt ?? "Pas de description",
+        epicTitle: spec.Epic?.title ?? "Épique sans titre",
+        epicDescription: spec.Epic?.description ?? null,
+        specTitle: spec.title,
+        specDescription: spec.prompt ?? "Pas de description",
       };
 
   const workspaceContext = buildWorkspaceContext(spec.workspace);

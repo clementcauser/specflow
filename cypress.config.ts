@@ -89,6 +89,24 @@ export default defineConfig({
           return workspace?.id ?? null;
         },
 
+        async setActiveWorkspace({
+          email,
+          slug,
+        }: {
+          email: string;
+          slug: string;
+        }) {
+          const workspace = await prisma.workspace.findUnique({
+            where: { slug },
+          });
+          if (!workspace) throw new Error(`Workspace ${slug} introuvable`);
+          await prisma.user.update({
+            where: { email },
+            data: { activeWorkspaceId: workspace.id },
+          });
+          return null;
+        },
+
         async deleteWorkspace(slug: string) {
           await prisma.workspace.delete({ where: { slug } }).catch(() => {});
           return null;
