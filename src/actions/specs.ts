@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
-
-const FREE_PLAN_LIMIT = 3;
+import { canCreateSpec } from "@/lib/plan-limits";
 
 const createSpecSchema = z.object({
   title: z.string().min(2).max(100),
@@ -27,37 +26,12 @@ export async function createSpec(data: z.infer<typeof createSpecSchema>) {
         workspaceId: parsed.workspaceId,
       },
     },
-    include: { workspace: { select: { plan: true } } },
+    select: { id: true },
   });
   if (!member) throw new Error("Accès refusé");
 
-  if (member.workspace.plan === "FREE") {
-    // Vérification et création dans une transaction pour éviter la race condition
-    const spec = await prisma.$transaction(async (tx) => {
-      const count = await tx.spec.count({
-        where: { workspaceId: parsed.workspaceId },
-      });
-      if (count >= FREE_PLAN_LIMIT) {
-        throw new Error(
-          "Limite du plan gratuit atteinte. Passez au plan Pro pour continuer.",
-        );
-      }
-      return tx.spec.create({
-        data: {
-          title: parsed.title,
-          prompt: parsed.prompt,
-          workspaceId: parsed.workspaceId,
-          projectId: parsed.projectId,
-          epicId: parsed.epicId,
-          creatorId: session.user.id,
-          status: "DRAFT",
-          content: { _sections: parsed.sections },
-        },
-      });
-    });
-    revalidatePath("/specs");
-    return spec;
-  }
+  const { allowed } = await canCreateSpec(parsed.workspaceId);
+  if (!allowed) throw new Error("PLAN_LIMIT_REACHED");
 
   const spec = await prisma.spec.create({
     data: {
@@ -208,9 +182,42 @@ export async function getWorkspacePlanInfo(workspaceId: string) {
   return {
     plan,
     specsCount,
-    limit: FREE_PLAN_LIMIT,
-    isAtLimit: specsCount >= FREE_PLAN_LIMIT,
+    limit: 3,
+    isAtLimit: specsCount >= 3,
   };
+}
+
+export async function deleteSpec(specId: string) {
+  const session = await requireSession();
+
+  const spec = await prisma.spec.findUnique({
+    where: { id: specId },
+    select: { workspaceId: true, creatorId: true },
+  });
+  if (!spec) throw new Error("Spec introuvable");
+  if (!spec.workspaceId) throw new Error("Spec sans workspace");
+
+  const member = await prisma.member.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId: session.user.id,
+        workspaceId: spec.workspaceId,
+      },
+    },
+    select: { role: true },
+  });
+  if (!member) throw new Error("Accès refusé");
+
+  const canDelete =
+    spec.creatorId === session.user.id ||
+    member.role === "OWNER" ||
+    member.role === "ADMIN";
+  if (!canDelete) throw new Error("Accès refusé");
+
+  await prisma.spec.delete({ where: { id: specId } });
+
+  revalidatePath("/specs");
+  revalidatePath("/dashboard");
 }
 
 const updateSpecSchema = z.object({
