@@ -1,8 +1,9 @@
-// ─── Données de test ──────────────────────────────────────────────────────────
+import { generateUid } from "../support/utils";
 
-const USER_EMAIL = "export-test@specflow.test";
+const id = generateUid();
+const USER_EMAIL = `export-test-${id}@specflow.test`;
 const USER_PASSWORD = "TestPassword123!";
-const WORKSPACE_SLUG = "ws-export-test";
+const WORKSPACE_SLUG = `ws-export-test-${id}`;
 
 const FAKE_SPEC = {
   title: "Plateforme de réservation de salles de réunion",
@@ -53,8 +54,8 @@ describe("Export de spec (Markdown & PDF)", () => {
       title: FAKE_SPEC.title,
       prompt: FAKE_SPEC.prompt,
       content: FAKE_SPEC.content,
-    }).then((id: string) => {
-      specId = id;
+    }).then((id) => {
+      specId = id as string;
     });
   });
 
@@ -181,7 +182,9 @@ describe("Export de spec (Markdown & PDF)", () => {
       cy.request(`/api/specs/${specId}/export/markdown`).then((res) => {
         const disposition = res.headers["content-disposition"] as string;
         // Le titre est converti en kebab-case sans caractères spéciaux
-        expect(disposition).to.include("plateforme-de-rservation-de-salles-de-runion");
+        expect(disposition).to.include(
+          "plateforme-de-rservation-de-salles-de-runion",
+        );
       });
     });
   });
@@ -238,23 +241,30 @@ describe("Export de spec (Markdown & PDF)", () => {
     it("affiche la barre d'export avec le label Exporter et le bouton Modifier", () => {
       cy.viewport(1280, 800);
       cy.visit(`/specs/${specId}`);
-      cy.get('[data-testid="export-bar-desktop"]').filter(':visible').should('contain', 'Exporter');
+      cy.get('[data-testid="export-bar-desktop"]')
+        .filter(":visible")
+        .should("contain", "Exporter");
       cy.contains("a", "Modifier").should("be.visible");
     });
 
     it("la barre d'export desktop propose les boutons Markdown et PDF directement", () => {
       cy.viewport(1280, 800);
       cy.visit(`/specs/${specId}`);
-      cy.get('[data-testid="export-bar-desktop"]').filter(':visible').within(() => {
-        cy.contains("button", "Markdown").should("be.visible");
-        cy.contains("button", "PDF").should("be.visible");
-      });
+      cy.get('[data-testid="export-bar-desktop"]')
+        .filter(":visible")
+        .within(() => {
+          cy.contains("button", "Markdown").should("be.visible");
+          cy.contains("button", "PDF").should("be.visible");
+        });
     });
 
     it("sur mobile le menu déroulant Exporter propose Markdown et PDF", () => {
       cy.viewport(375, 812);
       cy.visit(`/specs/${specId}`);
-      cy.get('[data-testid="export-bar-mobile"]').first().find('button').click({ force: true });
+      cy.get('[data-testid="export-bar-mobile"]')
+        .first()
+        .find("button")
+        .click({ force: true });
       cy.contains("Markdown (.md)").should("exist");
       cy.contains("PDF").should("exist");
     });

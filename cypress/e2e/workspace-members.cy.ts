@@ -1,14 +1,11 @@
+import { generateUid } from "../support/utils";
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-
-function uid() {
-  return Math.random().toString(36).substring(7);
-}
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("Gestion des membres d'un workspace", () => {
-  const id = uid();
+  const id = generateUid();
 
   // Utilisateur propriétaire
   const ownerEmail = `test-owner-${id}@example.com`;
