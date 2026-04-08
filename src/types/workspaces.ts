@@ -12,7 +12,7 @@ export type WorkspaceRole = (typeof WorkspaceRole)[keyof typeof WorkspaceRole];
 export const WorkspacePlan = {
   FREE: "FREE",
   PRO: "PRO",
-  ENTERPRISE: "ENTERPRISE",
+  MAX: "MAX",
 } as const;
 export type WorkspacePlan = (typeof WorkspacePlan)[keyof typeof WorkspacePlan];
 
@@ -78,7 +78,7 @@ export const ROLE_LABELS: Record<Role, string> = {
 export const PLAN_LABELS: Record<Plan, string> = {
   [WorkspacePlan.FREE]: "Gratuit",
   [WorkspacePlan.PRO]: "Pro",
-  [WorkspacePlan.ENTERPRISE]: "Entreprise",
+  [WorkspacePlan.MAX]: "Max",
 };
 
 // Hiérarchie des permissions
@@ -100,7 +100,8 @@ export const WORKSPACE_TYPE_LABELS: Record<WorkspaceType, string> = {
 };
 
 export const WORKSPACE_TYPE_DESCRIPTIONS: Record<WorkspaceType, string> = {
-  [WorkspaceType.AGENCY]: "Je crée des specs pour des projets clients distincts",
+  [WorkspaceType.AGENCY]:
+    "Je crée des specs pour des projets clients distincts",
   [WorkspaceType.PRODUCT]: "Je travaille sur un produit en évolution continue",
   [WorkspaceType.FREELANCE]: "Je gère plusieurs clients en parallèle",
 };

@@ -20,8 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plan } from "@/types/workspaces";
-import { WorkspacePlan } from "@/types/workspaces";
+import { Plan, WorkspacePlan } from "@/types/workspaces";
 
 type Props = {
   workspace: {
@@ -100,9 +99,7 @@ export function WorkspaceSettingsForm({ workspace, canEdit }: Props) {
               <SelectContent>
                 <SelectItem value={WorkspacePlan.FREE}>Gratuit</SelectItem>
                 <SelectItem value={WorkspacePlan.PRO}>Pro</SelectItem>
-                <SelectItem value={WorkspacePlan.ENTERPRISE}>
-                  Entreprise
-                </SelectItem>
+                <SelectItem value={WorkspacePlan.MAX}>Max</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -16,7 +16,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
     "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
+    "@prisma/client": "^7.7.0",
     "@react-pdf/renderer": "^4.3.2",
     "@types/oauth": "^0.9.6",
     "better-auth": "^1.5.5",
@@ -51,7 +51,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "^7.5.0",
+    "prisma": "^7.7.0",
     "start-server-and-test": "^2.1.5",
     "tailwindcss": "^4",
     "typescript": "^5"
